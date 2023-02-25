@@ -1,7 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Random = System.Random;
 using UnityEngine;
 using Utils;
+using System.Collections.Generic;
 
 public enum TileType
 {
@@ -20,6 +20,7 @@ public class LevelGenerator : MonoBehaviour
     public GameObject[] tiles;
     private const int gridWidth = 64, gridHeight = gridWidth;
     private const int maxRoomSizeX = 8, maxRoomSizeY = maxRoomSizeX;
+    private List<Vector2> centers = new(), sizes = new();
 
 
     protected void Start()
@@ -44,15 +45,49 @@ public class LevelGenerator : MonoBehaviour
 
     private void GenerateRooms(TileType[,] grid, int roomCount)
     {
-        int Rand(int val) => Random.Range(3, val);
+        Random rand = new Random();
+        int Rand(int val) => rand.Next(3, val);
 
         for (int i = 0; i < roomCount; i++)
         {
-            int x = Rand(gridWidth - maxRoomSizeX), y = Rand(gridHeight - maxRoomSizeY), w = Rand(maxRoomSizeX), h = Rand(maxRoomSizeY);
+            int x, y, w, h;
+
+            void Randomize()
+            {
+                x = Rand(gridWidth - maxRoomSizeX);
+                y = Rand(gridHeight - maxRoomSizeY);
+                w = Rand(maxRoomSizeX);
+                h = Rand(maxRoomSizeY);
+            }
+            Randomize();
+
+            bool CheckCollisions() 
+            {
+                Collider2D[] colliders = Physics2D.OverlapBoxAll(new Vector2(x + w / 2, y + h / 2), new Vector2(w, h), 0);
+                centers.Add(new Vector2(x + w / 2, y + h / 2));
+                sizes.Add(new Vector2(w, h));
+
+                foreach (Collider2D collider in colliders)
+                {
+                    if (collider != null)
+                        return true;
+                    else return false;
+                }
+
+                return false;
+            }
+
+            while (CheckCollisions())
+            {
+                Randomize();
+            }
 
             FillBlock(grid, x, y, w, h, TileType.Wall);
-            
+
             FillBlock(grid, x + 1, y + 1, w - 2, h - 2, TileType.Empty);
+
+            Debugger.instance.AddLabel(x + w / 2, y + h / 2, $"Room: {i} ");
+
         }
     }
 
@@ -109,4 +144,12 @@ public class LevelGenerator : MonoBehaviour
         return null;
     }
 
+
+    private void OnDrawGizmos()
+    {
+        for (int i = 0; i < centers.Count; i++)
+        {
+                Gizmos.DrawCube(centers[i], sizes[i]);
+        }
+    }
 }
