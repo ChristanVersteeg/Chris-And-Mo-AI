@@ -10,6 +10,6 @@ namespace InGame {
 
     public class Pickup : MonoBehaviour
     {
-        public PickupType type = PickupType.Key;
+        public PickupType type;
     }
 }

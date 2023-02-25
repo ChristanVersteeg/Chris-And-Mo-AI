@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace InGame {
+namespace InGame
+{
     public class UpdateHUD : MonoBehaviour
     {
         private Player player;
@@ -12,15 +13,24 @@ namespace InGame {
         public Text keyText;
         public Text infoText;
 
+        private void DisableStartupText() => infoText.enabled = false;
+
+        private void Start()
+        {
+            Invoke(nameof(DisableStartupText), 3);
+        }
+
         void Update()
         {
-            if (Input.anyKeyDown) infoText.enabled = false;
-            if (player == null) {
+            if (player == null)
+            {
                 infoText.enabled = true;
                 player = FindObjectOfType<Player>();
-            } else {
-                daggerText.text = "x" + player.daggers;
-                keyText.text = "x" + player.keys;
+            }
+            else
+            {
+                daggerText.text = $"x {player.daggers}";
+                keyText.text = $"x {player.keys}";
             }
         }
     }
