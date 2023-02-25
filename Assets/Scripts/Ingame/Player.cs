@@ -119,8 +119,7 @@ namespace InGame
         //when colliding with wall or door
         protected override bool HandleObstruction(GameObject other)
         {
-            Obstruction obstruction = other.GetComponent<Obstruction>();
-            if (obstruction != null)
+            if (other.TryGetComponent(out Obstruction obstruction))
             {
                 if (obstruction.canBeOpened)
                 {
@@ -133,6 +132,7 @@ namespace InGame
                 }
                 return false;
             }
+
             return true;
         }
 
