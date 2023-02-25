@@ -1,8 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace InGame {
+namespace InGame
+{
     public class Obstruction : MonoBehaviour
     {
         public bool canBeOpened = false;

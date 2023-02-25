@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Utils;
 
-public enum TileType {
+public enum TileType
+{
     Empty = 0,
     Player,
     Enemy,
@@ -19,7 +20,7 @@ public class LevelGenerator : MonoBehaviour
     public GameObject[] tiles;
 
     protected void Start()
-    {        
+    {
         int width = 64;
         int height = 64;
         TileType[,] grid = new TileType[height, width];
@@ -40,41 +41,52 @@ public class LevelGenerator : MonoBehaviour
     }
 
     //fill part of array with tiles
-    private void FillBlock(TileType[,] grid, int x, int y, int width, int height, TileType fillType) {
-        for (int tileY=0; tileY<height; tileY++) {
-            for (int tileX=0; tileX<width; tileX++) {
+    private void FillBlock(TileType[,] grid, int x, int y, int width, int height, TileType fillType)
+    {
+        for (int tileY = 0; tileY < height; tileY++)
+        {
+            for (int tileX = 0; tileX < width; tileX++)
+            {
                 grid[tileY + y, tileX + x] = fillType;
             }
         }
     }
 
     //use array to create tiles
-    private void CreateTilesFromArray(TileType[,] grid) {
+    private void CreateTilesFromArray(TileType[,] grid)
+    {
         int height = grid.GetLength(0);
         int width = grid.GetLength(1);
-        for (int y=0; y<height; y++) {
-            for (int x=0; x<width; x++) {
-                 TileType tile = grid[y, x];
-                 if (tile != TileType.Empty) {
-                     CreateTile(x, y, tile);
-                 }
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                TileType tile = grid[y, x];
+                if (tile != TileType.Empty)
+                {
+                    CreateTile(x, y, tile);
+                }
             }
         }
     }
 
     //create a single tile
-    private GameObject CreateTile(int x, int y, TileType type) {
+    private GameObject CreateTile(int x, int y, TileType type)
+    {
         int tileID = ((int)type) - 1;
         if (tileID >= 0 && tileID < tiles.Length)
         {
             GameObject tilePrefab = tiles[tileID];
-            if (tilePrefab != null) {
+            if (tilePrefab != null)
+            {
                 GameObject newTile = GameObject.Instantiate(tilePrefab, new Vector3(x, y, 0), Quaternion.identity);
                 newTile.transform.SetParent(transform);
                 return newTile;
             }
 
-        } else {
+        }
+        else
+        {
             Debug.LogError("Invalid tile type selected");
         }
 

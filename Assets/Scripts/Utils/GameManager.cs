@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using InGame;
 
-namespace Utils {
+namespace Utils
+{
     public class GameManager : MonoBehaviour
     {
         const float ResetTimeout = 2f;
@@ -21,17 +22,20 @@ namespace Utils {
         private float resetTime = 0.0f;//for auto reset
 
         //on start, generate new level
-        protected void Start() {
+        protected void Start()
+        {
             OnReset();
         }
 
         //ends game, places done message
-        private void OnDone() {
+        private void OnDone()
+        {
             playerTransform = null;
-            randomSeed ++; //sets new randomseed
+            randomSeed++; //sets new randomseed
             GameObject newDoneMessage = GameObject.Instantiate(doneMessage);
             newDoneMessage.transform.parent = level.transform;
-            if (mainCamera != null) {
+            if (mainCamera != null)
+            {
                 Vector3 pos = mainCamera.transform.position;
                 pos.z = 0;
                 newDoneMessage.transform.position = pos; //align message with camera
@@ -40,69 +44,88 @@ namespace Utils {
         }
 
         //regenerates level
-        private void OnReset() {
+        private void OnReset()
+        {
             playerTransform = null;
-            if (level != null) {
+            if (level != null)
+            {
                 Destroy(level);
             }
             Debugger.instance.Reset();
             StartLevel();
         }
 
-        private void StartLevel() {
+        private void StartLevel()
+        {
             Random.InitState(randomSeed);
             level = GameObject.Instantiate(levelPrefab);
             isDone = false;
         }
 
-        protected void UpdateCamera() {
-            if (mainCamera != null) {
-                if (playerTransform != null) {
+        protected void UpdateCamera()
+        {
+            if (mainCamera != null)
+            {
+                if (playerTransform != null)
+                {
                     Vector3 pos = playerTransform.position;
                     pos.z = mainCamera.transform.position.z;
                     mainCamera.transform.position = pos;
-                } else {
+                }
+                else
+                {
                     FindPlayerTransform();
                 }
             }
         }
 
-        private void FindPlayerTransform() {
-            foreach (Player player in FindObjectsOfType<Player>()) {
+        private void FindPlayerTransform()
+        {
+            foreach (Player player in FindObjectsOfType<Player>())
+            {
                 player.OnGameDone = OnDone;
                 player.OnGameReset = OnReset;
                 playerTransform = player.transform;
             }
         }
 
-        protected void Update() {
-            if (autoReset) { //regenerates level every ResetTimeout seconds
+        protected void Update()
+        {
+            if (autoReset)
+            { //regenerates level every ResetTimeout seconds
                 resetTime += Time.deltaTime;
-                if (resetTime > ResetTimeout) {
+                if (resetTime > ResetTimeout)
+                {
                     resetTime = 0;
                     OnDone();
                     OnReset();
                 }
             }
-            if (isDone) {
-                if (Input.GetKeyDown(KeyCode.Space)) { //space = reset (when done)
+            if (isDone)
+            {
+                if (Input.GetKeyDown(KeyCode.Space))
+                { //space = reset (when done)
                     OnReset();
                 }
             }
 
-            if (Input.GetKeyDown(KeyCode.R)) { //R = reset (same randomseed)
-                if (Input.GetKey(KeyCode.LeftShift)) { //Shift+R = new randomseed, then reset
+            if (Input.GetKeyDown(KeyCode.R))
+            { //R = reset (same randomseed)
+                if (Input.GetKey(KeyCode.LeftShift))
+                { //Shift+R = new randomseed, then reset
                     OnDone();
                     OnReset();
-                } else {
+                }
+                else
+                {
                     OnReset();
                 }
             }
         }
 
-        protected void LateUpdate() {
+        protected void LateUpdate()
+        {
             UpdateCamera();
         }
-
     }
 }

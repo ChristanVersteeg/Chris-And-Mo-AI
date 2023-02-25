@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-namespace InGame {
+namespace InGame
+{
     public class Player : Movable
     {
         public int keys = 0;
@@ -12,26 +13,33 @@ namespace InGame {
         public Action OnGameDone = null;
         public Action OnGameReset = null;
 
-        protected override void Start() {
+        protected override void Start()
+        {
             base.Start();
         }
 
-        protected override void HandleControls() {
+        protected override void HandleControls()
+        {
             int moveX = 0;
             int moveY = 0;
-            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) {
+            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
+            {
                 moveY = 5;
             }
-            if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) {
+            if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+            {
                 moveY = -5;
             }
-            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) {
+            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+            {
                 moveX = -5;
             }
-            if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) {
+            if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+            {
                 moveX = 5;
             }
-            if (Input.GetKey(KeyCode.LeftShift)) {
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
                 moveX += moveX;
                 moveY += moveY;
             }
@@ -39,7 +47,8 @@ namespace InGame {
             Move(0, moveY);//using SAT to make wall-sliding possible
         }
 
-        protected override bool HandleCollision(GameObject other) {
+        protected override bool HandleCollision(GameObject other)
+        {
             if (!HandleObstruction(other)) return false;
             if (!HandlePickup(other)) return false;
             if (!HandleEnemy(other)) return false;
@@ -48,10 +57,13 @@ namespace InGame {
         }
 
         //when colliding with endflag->level done
-        private bool HandleEnd(GameObject other) {
+        private bool HandleEnd(GameObject other)
+        {
             End end = other.GetComponent<End>();
-            if (end != null) {
-                if (OnGameDone != null) {
+            if (end != null)
+            {
+                if (OnGameDone != null)
+                {
                     OnGameDone();
                 }
                 Destroy(gameObject);
@@ -60,15 +72,21 @@ namespace InGame {
         }
 
         //when colliding with enemy->reset level
-        private bool HandleEnemy(GameObject other) {
+        private bool HandleEnemy(GameObject other)
+        {
             Enemy enemy = other.GetComponent<Enemy>();
-            if (enemy != null) {
-                if (daggers > 0) {
-                    daggers --;
+            if (enemy != null)
+            {
+                if (daggers > 0)
+                {
+                    daggers--;
                     Destroy(other);
-                } else {
+                }
+                else
+                {
                     Destroy(gameObject);
-                    if (OnGameReset != null) {
+                    if (OnGameReset != null)
+                    {
                         OnGameReset();
                     }
                 }
@@ -77,14 +95,18 @@ namespace InGame {
         }
 
         //when picking up dagger or key
-        private bool HandlePickup(GameObject other) {
+        private bool HandlePickup(GameObject other)
+        {
             Pickup pickup = other.GetComponent<Pickup>();
-            if (pickup != null) {
-                if (pickup.type == PickupType.Key) {
-                    keys ++;
+            if (pickup != null)
+            {
+                if (pickup.type == PickupType.Key)
+                {
+                    keys++;
                 }
-                if (pickup.type == PickupType.Dagger) {
-                    daggers ++;
+                if (pickup.type == PickupType.Dagger)
+                {
+                    daggers++;
                 }
                 Destroy(other);
             }
@@ -92,12 +114,16 @@ namespace InGame {
         }
 
         //when colliding with wall or door
-        protected override bool HandleObstruction(GameObject other) {
+        protected override bool HandleObstruction(GameObject other)
+        {
             Obstruction obstruction = other.GetComponent<Obstruction>();
-            if (obstruction != null) {
-                if (obstruction.canBeOpened) {
-                    if (keys > 0) {
-                        keys --;
+            if (obstruction != null)
+            {
+                if (obstruction.canBeOpened)
+                {
+                    if (keys > 0)
+                    {
+                        keys--;
                         Destroy(other);
                         return true;
                     }

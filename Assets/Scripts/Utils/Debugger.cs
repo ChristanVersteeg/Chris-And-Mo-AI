@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Utils {
+namespace Utils
+{
     public class Debugger : MonoBehaviour
     {
         public static Debugger instance = null;
@@ -11,12 +12,14 @@ namespace Utils {
 
         public List<GameObject> labels;
 
-        void Awake() {
+        void Awake()
+        {
             instance = this;
             labels = new List<GameObject>();
         }
 
-        public TextMesh AddLabel(int x, int y, string text) {
+        public TextMesh AddLabel(int x, int y, string text)
+        {
             GameObject newText = GameObject.Instantiate(textPrefab);
             newText.transform.position = new Vector3(x, y, 0);
             newText.transform.SetParent(transform);
@@ -26,8 +29,9 @@ namespace Utils {
             return textMesh;
         }
 
-        public void Reset() {
-            foreach (GameObject label in labels) 
+        public void Reset()
+        {
+            foreach (GameObject label in labels)
             {
                 Destroy(label);
             }

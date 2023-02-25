@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace InGame {
-    public enum PickupType {
+namespace InGame
+{
+    public enum PickupType
+    {
         Key,
         Dagger
     }
