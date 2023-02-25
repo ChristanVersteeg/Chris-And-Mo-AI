@@ -97,19 +97,22 @@ namespace InGame
         //when picking up dagger or key
         private bool HandlePickup(GameObject other)
         {
-            Pickup pickup = other.GetComponent<Pickup>();
-            if (pickup != null)
+            if (other.TryGetComponent(out Pickup pickup))
             {
-                if (pickup.type == PickupType.Key)
+                switch (pickup.type)
                 {
-                    keys++;
+                    case PickupType.Key:
+                        keys++;
+                        break;
+
+                    case PickupType.Dagger:
+                        daggers++;
+                        break;
                 }
-                if (pickup.type == PickupType.Dagger)
-                {
-                    daggers++;
-                }
+
                 Destroy(other);
             }
+
             return true;
         }
 
