@@ -5,7 +5,7 @@ using Utils;
 
 public enum TileType
 {
-    Empty = 0,
+    Empty,
     Player,
     Enemy,
     Wall,
@@ -18,15 +18,17 @@ public enum TileType
 public class LevelGenerator : MonoBehaviour
 {
     public GameObject[] tiles;
+    private const int gridWidth = 64, gridHeight = gridWidth;
+    private const int maxRoomSizeX = 8, maxRoomSizeY = maxRoomSizeX;
+
 
     protected void Start()
     {
-        int width = 64;
-        int height = 64;
-        TileType[,] grid = new TileType[height, width];
+        TileType[,] grid = new TileType[gridHeight, gridWidth];
 
-        FillBlock(grid, 0, 0, width, height, TileType.Wall);
-        FillBlock(grid, 26, 26, 12, 12, TileType.Empty);
+        //FillBlock(grid, 0, 0, width, height, TileType.Wall);
+        GenerateRooms(grid, 8);
+        //FillBlock(grid, 26, 26, 12, 12, TileType.Empty);
         FillBlock(grid, 32, 28, 1, 1, TileType.Player);
         FillBlock(grid, 30, 30, 1, 1, TileType.Dagger);
         FillBlock(grid, 34, 30, 1, 1, TileType.Key);
@@ -36,11 +38,25 @@ public class LevelGenerator : MonoBehaviour
 
         Debugger.instance.AddLabel(32, 26, "Room 1");
 
-        //use 2d array (i.e. for using cellular automata)
+
         CreateTilesFromArray(grid);
     }
 
-    //fill part of array with tiles
+    private void GenerateRooms(TileType[,] grid, int roomCount)
+    {
+        int Rand(int val) => Random.Range(3, val);
+
+        for (int i = 0; i < roomCount; i++)
+        {
+            int x = Rand(gridWidth - maxRoomSizeX), y = Rand(gridHeight - maxRoomSizeY), w = Rand(maxRoomSizeX), h = Rand(maxRoomSizeY);
+
+            FillBlock(grid, x, y, w, h, TileType.Wall);
+            
+            FillBlock(grid, x + 1, y + 1, w - 2, h - 2, TileType.Empty);
+        }
+    }
+
+    //fill part of array with tiles 
     private void FillBlock(TileType[,] grid, int x, int y, int width, int height, TileType fillType)
     {
         for (int tileY = 0; tileY < height; tileY++)
