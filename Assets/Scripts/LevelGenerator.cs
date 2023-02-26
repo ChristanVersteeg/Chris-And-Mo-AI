@@ -18,46 +18,52 @@ public enum TileType
 
 public class LevelGenerator : MonoBehaviour
 {
-    public GameObject[] tiles;
+    [SerializeField] private GameObject[] tiles;
+    private Random random = new Random();
     private const int gridWidth = 64, gridHeight = gridWidth;
     private const int maxRoomSizeX = 8, maxRoomSizeY = maxRoomSizeX;
     private const int maxRooms = 100;
     private Vector2 center, size;
-    private WaitForSeconds interval = new(0.1f);
+    [SerializeField] private float time = 0.3f;
+    private WaitForSeconds interval = new(0.3f);
+    private List<GameObject> currentRoom = new();
+    private int cycleCount;
 
+    private void OnValidate()
+    {
+        interval = new WaitForSeconds(time);
+    }
 
     protected void Start()
     {
-        TileType[,] grid = new TileType[gridHeight, gridWidth];
-
-        StartCoroutine(GenerateRooms(grid, maxRooms));
+        StartCoroutine(GenerateRooms());
     }
 
-    private IEnumerator GenerateRooms(TileType[,] grid, int roomCount)
+    private IEnumerator GenerateRooms()
     {
-        Random rand = new Random();
-        int Rand(int val) => rand.Next(3, val);
+        int Random(int val) => random.Next(3, val);
 
-        for (int i = 0; i < roomCount; i++)
+        TileType[,] grid = new TileType[gridHeight, gridWidth];
+
+        for (int i = 0; i < maxRooms; i++)
         {
             int x, y, w, h;
 
             void Randomize()
             {
-                x = Rand(gridWidth - maxRoomSizeX);
-                y = Rand(gridHeight - maxRoomSizeY);
-                w = Rand(maxRoomSizeX);
-                h = Rand(maxRoomSizeY);
-            }
-            Randomize();
-            center = new Vector2(x + w / 2, y + h / 2);
-            size = new Vector2(w, h);
+                x = Random(gridWidth - maxRoomSizeX);
+                y = Random(gridHeight - maxRoomSizeY);
+                w = Random(maxRoomSizeX);
+                h = Random(maxRoomSizeY);
 
-            while (Physics2D.OverlapBoxAll(new Vector2(x + w / 2, y + h / 2), new Vector2(w, h), 0).Length > 0)
-            {
-                Randomize();
                 center = new Vector2(x + w / 2, y + h / 2);
                 size = new Vector2(w, h);
+            }
+            Randomize();
+
+            while (Physics2D.OverlapBoxAll(center, size, 0).Length > 0)
+            {
+                Randomize();
                 yield return interval;
             }
 
@@ -67,7 +73,9 @@ public class LevelGenerator : MonoBehaviour
 
             CreateTilesFromArray(grid);
 
-            Debugger.instance.AddLabel(x + w / 2, y + h / 2, $"Room: {i} ");
+            Debugger.instance.AddLabel((int)center.x, (int)center.y, $"Room: {i}").name = $"Room: {i}";
+
+            grid = new TileType[gridHeight, gridWidth];
 
             yield return interval;
         }
@@ -110,6 +118,15 @@ public class LevelGenerator : MonoBehaviour
                 }
             }
         }
+
+        Transform parent = new GameObject($"Room{cycleCount}").transform;
+        parent.SetParent(transform);
+
+        foreach (GameObject room in currentRoom)
+            room.transform.SetParent(parent);
+
+        currentRoom.Clear();
+        cycleCount++;
     }
 
     //create a single tile
@@ -121,11 +138,10 @@ public class LevelGenerator : MonoBehaviour
             GameObject tilePrefab = tiles[tileID];
             if (tilePrefab != null)
             {
-                GameObject newTile = GameObject.Instantiate(tilePrefab, new Vector3(x, y, 0), Quaternion.identity);
-                newTile.transform.SetParent(transform);
+                GameObject newTile = Instantiate(tilePrefab, new Vector3(x, y, 0), Quaternion.identity);
+                currentRoom.Add(newTile);
                 return newTile;
             }
-
         }
         else
         {
