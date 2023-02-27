@@ -15,7 +15,7 @@ public enum TileType
     End
 }
 
-public class LevelGenerator : MonoBehaviour
+public class LevelGeneratorMo : MonoBehaviour
 {
     public GameObject[] tiles;
 

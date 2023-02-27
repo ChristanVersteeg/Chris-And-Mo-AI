@@ -5,7 +5,7 @@ using System;
 
 namespace InGame
 {
-    public class Player : Movable
+    public class Player : MovableMo 
     {
         public int keys = 0;
         public int daggers = 0;

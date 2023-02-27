@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace InGame
 {
-    public class Enemy : Movable
+    public class Enemy : MovableMo
     {
         const float DetectRadius = 6.0f;
 
