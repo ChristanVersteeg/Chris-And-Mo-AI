@@ -77,9 +77,16 @@ public class LevelGenerator : MonoBehaviour
 #endif
             }
 
-            FillBlock(grid, x, y, w, h, TileType.Wall);
 
+            //Create Rooms
+            FillBlock(grid, x, y, w, h, TileType.Wall);
             FillBlock(grid, x + 1, y + 1, w - 2, h - 2, TileType.Empty);
+
+            //Create holes in the walls
+            CreateTile((int)center.x + w/2, (int)center.y, TileType.Empty); //Right tile
+            CreateTile((int)center.x - w/2, (int)center.y, TileType.Empty); //Left tile
+            CreateTile((int)center.x, (int)center.y+h/2, TileType.Empty); //Upper tile
+            CreateTile((int)center.x, (int)center.y-h/2, TileType.Empty); //Lower tile
 
             CreateTilesFromArray(grid);
 
