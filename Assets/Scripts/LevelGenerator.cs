@@ -31,15 +31,17 @@ public class LevelGenerator : MonoBehaviour
     private Vector2 center, size;
 
 #if Debug
-    [SerializeField] private float time = 0.3f;
 #if DelayRoomGeneration
+    [SerializeField] private float time = 0.3f;
     private WaitForSeconds interval = new(0.3f);
 #endif
-    private List<Vector2> debug = new();
+    private List<Vector2Int> debug = new();
     private List<int> intDebug = new();
+    private List<int> intDebug2 = new();
 #endif
 
     private List<GameObject> currentRoom = new();
+    private List<Vector2Int> doorPositions = new();
     private int cycleCount, roomCount;
 
 #if DelayRoomGeneration
@@ -105,30 +107,37 @@ public class LevelGenerator : MonoBehaviour
             Vector2Int u = new((int)center.x, (int)center.y + h / 2); //Up tile
             Vector2Int d = new((int)center.x, (int)center.y - h / 2); //Down tile
 
-            //For some reason the y is the first and afterward is the x ¯\_(ツ)_/¯
+            doorPositions.Add(r);
+            doorPositions.Add(l);
+            doorPositions.Add(u);
+            doorPositions.Add(d);
+
+#if Debug
+            debug.AddRange(doorPositions);
+#endif
+
             int openDoors = random.Next(1, 5);
             intDebug.Add(openDoors);
             int openedDoors = 0;
 
-            void TryOpenDoor(Vector2Int pos)
+            void TryOpenDoor()
             {
                 if (openedDoors == openDoors) return;
 
-                grid[pos.y, pos.x] = TileType.Empty;
+                int rand = random.Next(0, doorPositions.Count);
+
+                //For some reason the y is the first and afterward is the x ¯\_(ツ)_/¯
+                grid[doorPositions[rand].y, doorPositions[rand].x] = TileType.Empty;
+                doorPositions.RemoveAt(rand);
+
                 openedDoors++;
             }
 
-            TryOpenDoor(r);
-            TryOpenDoor(l);
-            TryOpenDoor(u);
-            TryOpenDoor(d);
+            for (int j = 0; j < openDoors; j++)
+                TryOpenDoor();
 
-#if Debug
-            debug.Add(r);
-            debug.Add(l);
-            debug.Add(u);
-            debug.Add(d);
-#endif
+            print($"Amount of doors opened: {openDoors}, door positions remaining: {doorPositions.Count}");
+            intDebug2.Add(openedDoors);
 
             CreateTilesFromArray(grid);
 
@@ -140,6 +149,7 @@ public class LevelGenerator : MonoBehaviour
             yield return interval;
 #else
             roomCount++;
+            doorPositions.Clear();  
             yield return null;
 #endif
         }
@@ -154,11 +164,16 @@ public class LevelGenerator : MonoBehaviour
         CreateTilesFromArray(grid);
 
 #if Debug
-        float totalOpenDoors = 0;
+        int totalOpenDoors = 0;
         foreach (int randomInt in intDebug)
             totalOpenDoors += randomInt;
 
-        print($"Open Doors: {totalOpenDoors}, Closed And Open Doors: {roomCount * 4}, Percantage Of All Open Doors: {totalOpenDoors / (roomCount * 4) * 100}%");
+        int actualOpenDoors = 0;
+        foreach (int randomInt in intDebug2)
+            actualOpenDoors += randomInt;
+
+        print($"Open Doors: {totalOpenDoors}, Closed And Open Doors: {roomCount * 4}, Percantage Of All Open Doors: {(float)totalOpenDoors / (roomCount * 4) * 100}%");
+        print($"Expected Doors: {totalOpenDoors}, Actual Doors: {actualOpenDoors}");
 #endif
     }
 
