@@ -53,10 +53,16 @@ public class LevelGenerator : MonoBehaviour
 
             void Randomize()
             {
+                int IsOdd(int coord)
+                {
+                    if (coord % 2 == 0) coord += 1;
+                    return coord;
+                }
+
                 x = Random(gridWidth - maxRoomSizeX);
                 y = Random(gridHeight - maxRoomSizeY);
-                w = Random(maxRoomSizeX);
-                h = Random(maxRoomSizeY);
+                w = IsOdd(Random(maxRoomSizeX));
+                h = IsOdd(Random(maxRoomSizeY));
 
                 center = new Vector2(x + w / 2, y + h / 2);
                 size = new Vector2(w, h);
