@@ -23,8 +23,10 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField] private GameObject[] tiles;
     private Random random = new Random();
     private const int gridWidth = 64, gridHeight = gridWidth;
-    private const int maxRoomSizeX = 8, maxRoomSizeY = maxRoomSizeX;
+    private const int minRoomSize = 5, maxRoomSizeX = 16, maxRoomSizeY = maxRoomSizeX;
     private const int maxRooms = 25;
+    private const int maxRetries = 1000;
+
     private Vector2 center, size;
 
 #if Debug
@@ -50,13 +52,14 @@ public class LevelGenerator : MonoBehaviour
 
     private IEnumerator GenerateRooms()
     {
-        int Random(int val) => random.Next(3, val);
+        int Random(int val) => random.Next(minRoomSize, val);
 
         TileType[,] grid = new TileType[gridHeight, gridWidth];
 
         for (int i = 0; i < maxRooms; i++)
         {
             int x, y, w, h;
+            int retryCount = 0;
 
             void Randomize()
             {
@@ -73,19 +76,23 @@ public class LevelGenerator : MonoBehaviour
 
                 center = new Vector2(x + w / 2, y + h / 2);
                 size = new Vector2(w, h);
+
+                retryCount++;
             }
             Randomize();
 
             while (Physics2D.OverlapBoxAll(center, size, 0).Length > 0)
             {
                 Randomize();
+                if (retryCount > maxRetries) break;
 #if Debug
                 yield return interval;
 #endif
             }
+            if (retryCount > maxRetries) break;
 
-            //Create Rooms
-            FillBlock(grid, x, y, w, h, TileType.Wall);
+                //Create Rooms
+                FillBlock(grid, x, y, w, h, TileType.Wall);
 
             FillBlock(grid, x + 1, y + 1, w - 2, h - 2, TileType.Empty);
 
@@ -94,6 +101,7 @@ public class LevelGenerator : MonoBehaviour
             Vector2Int u = new((int)center.x, (int)center.y + h / 2); //Up tile
             Vector2Int d = new((int)center.x, (int)center.y - h / 2); //Down tile
 
+            //For some reason the y is the first and afterward is the x ¯\_(ツ)_/¯
             grid[r.y, r.x] = TileType.Empty;
             grid[l.y, l.x] = TileType.Empty;
             grid[u.y, u.x] = TileType.Empty;
