@@ -154,13 +154,11 @@ public class LevelGenerator : MonoBehaviour
         CreateTilesFromArray(grid);
 
 #if Debug
-        float result = 0, openDoors2 = 0;
+        float totalOpenDoors = 0;
         foreach (int randomInt in intDebug)
-        {
-            openDoors2 += randomInt;
-            result = openDoors2 / 4;
-        }
-        print($"Open Doors: {openDoors2}, Closed And Open Doors: {roomCount * 4}, Percantage Of All Open Doors: {openDoors2 / (roomCount * 4) * 100}%");
+            totalOpenDoors += randomInt;
+
+        print($"Open Doors: {totalOpenDoors}, Closed And Open Doors: {roomCount * 4}, Percantage Of All Open Doors: {totalOpenDoors / (roomCount * 4) * 100}%");
 #endif
     }
 
