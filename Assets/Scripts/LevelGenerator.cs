@@ -38,10 +38,23 @@ public class LevelGenerator : MonoBehaviour
     private List<Vector2Int> debug = new();
     private List<int> intDebug = new();
     private List<int> intDebug2 = new();
+    private int right, left, up, down;
+    private enum Direction
+    {
+        Right,
+        Left,
+        Up,
+        Down
+    }
 #endif
 
     private List<GameObject> currentRoom = new();
+#if !Debug
     private List<Vector2Int> doorPositions = new();
+#else
+    private List<(Vector2Int, Direction)> doorPositions = new();
+#endif
+
     private int cycleCount, roomCount;
 
 #if DelayRoomGeneration
@@ -107,13 +120,18 @@ public class LevelGenerator : MonoBehaviour
             Vector2Int u = new((int)center.x, (int)center.y + h / 2); //Up tile
             Vector2Int d = new((int)center.x, (int)center.y - h / 2); //Down tile
 
+#if !Debug
             doorPositions.Add(r);
             doorPositions.Add(l);
             doorPositions.Add(u);
             doorPositions.Add(d);
 
-#if Debug
             debug.AddRange(doorPositions);
+#else
+            doorPositions.Add((r, Direction.Right));
+            doorPositions.Add((l, Direction.Left));
+            doorPositions.Add((u, Direction.Up));
+            doorPositions.Add((d, Direction.Down));
 #endif
 
             int openDoors = random.Next(1, 5);
@@ -127,7 +145,29 @@ public class LevelGenerator : MonoBehaviour
                 int rand = random.Next(0, doorPositions.Count);
 
                 //For some reason the y is the first and afterward is the x ¯\_(ツ)_/¯
+#if !Debug
                 grid[doorPositions[rand].y, doorPositions[rand].x] = TileType.Empty;
+#else
+                grid[doorPositions[rand].Item1.y, doorPositions[rand].Item1.x] = TileType.Empty;
+
+                switch (doorPositions[rand].Item2)
+                {
+                    case Direction.Right:
+                        right++;
+                        break;
+                    case Direction.Left:
+                        left++;
+                        break;
+                    case Direction.Up:
+                        up++;
+                        break;
+                    case Direction.Down:
+                        down++;
+                        break;
+                    default:
+                        break;
+                }
+#endif
                 doorPositions.RemoveAt(rand);
 
                 openedDoors++;
@@ -149,7 +189,7 @@ public class LevelGenerator : MonoBehaviour
             yield return interval;
 #else
             roomCount++;
-            doorPositions.Clear();  
+            doorPositions.Clear();
             yield return null;
 #endif
         }
@@ -174,6 +214,7 @@ public class LevelGenerator : MonoBehaviour
 
         print($"Open Doors: {totalOpenDoors}, Closed And Open Doors: {roomCount * 4}, Percantage Of All Open Doors: {(float)totalOpenDoors / (roomCount * 4) * 100}%");
         print($"Expected Doors: {totalOpenDoors}, Actual Doors: {actualOpenDoors}");
+        print($"Right Doors: {right}, Left Doors: {left}, Up Doors: {up}, Down Doors: {down}");
 #endif
     }
 
