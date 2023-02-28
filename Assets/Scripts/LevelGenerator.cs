@@ -26,15 +26,22 @@ public class LevelGenerator : MonoBehaviour
     private const int maxRoomSizeX = 8, maxRoomSizeY = maxRoomSizeX;
     private const int maxRooms = 25;
     private Vector2 center, size;
+
+#if Debug
     [SerializeField] private float time = 0.3f;
     private WaitForSeconds interval = new(0.3f);
+    private List<Vector2> debug = new();
+#endif
+
     private List<GameObject> currentRoom = new();
     private int cycleCount;
 
+#if Debug
     private void OnValidate()
     {
         interval = new WaitForSeconds(time);
     }
+#endif
 
     protected void Start()
     {
@@ -77,16 +84,27 @@ public class LevelGenerator : MonoBehaviour
 #endif
             }
 
-
             //Create Rooms
             FillBlock(grid, x, y, w, h, TileType.Wall);
+
             FillBlock(grid, x + 1, y + 1, w - 2, h - 2, TileType.Empty);
 
-            //Create holes in the walls
-            CreateTile((int)center.x + w/2, (int)center.y, TileType.Empty); //Right tile
-            CreateTile((int)center.x - w/2, (int)center.y, TileType.Empty); //Left tile
-            CreateTile((int)center.x, (int)center.y+h/2, TileType.Empty); //Upper tile
-            CreateTile((int)center.x, (int)center.y-h/2, TileType.Empty); //Lower tile
+            Vector2Int r = new((int)center.x + w / 2, (int)center.y); //Right tile
+            Vector2Int l = new((int)center.x - w / 2, (int)center.y); //Left tile
+            Vector2Int u = new((int)center.x, (int)center.y + h / 2); //Up tile
+            Vector2Int d = new((int)center.x, (int)center.y - h / 2); //Down tile
+
+            grid[r.y, r.x] = TileType.Empty;
+            grid[l.y, l.x] = TileType.Empty;
+            grid[u.y, u.x] = TileType.Empty;
+            grid[d.y, d.x] = TileType.Empty;
+
+#if Debug
+            debug.Add(r);
+            debug.Add(l);
+            debug.Add(u);
+            debug.Add(d);
+#endif
 
             CreateTilesFromArray(grid);
 
@@ -112,7 +130,7 @@ public class LevelGenerator : MonoBehaviour
     }
 
     //fill part of array with tiles 
-    private void FillBlock(TileType[,] grid, int x, int y, int width, int height, TileType fillType)
+    private void FillBlock(TileType[,] grid, int x, int y, int width = 1, int height = 1, TileType fillType = TileType.Empty)
     {
         for (int tileY = 0; tileY < height; tileY++)
         {
@@ -178,6 +196,10 @@ public class LevelGenerator : MonoBehaviour
         Gizmos.color = Color.green;
 
         Gizmos.DrawWireCube(center, size);
+
+          foreach (Vector2 vector in debug)
+            Gizmos.DrawWireCube(vector, Vector2.one);
     }
 #endif
+
 }
