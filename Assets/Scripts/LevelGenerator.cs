@@ -1,4 +1,6 @@
-﻿using Random = System.Random;
+﻿//#define Debug
+
+using Random = System.Random;
 using UnityEngine;
 using Utils;
 using System.Collections.Generic;
@@ -22,7 +24,7 @@ public class LevelGenerator : MonoBehaviour
     private Random random = new Random();
     private const int gridWidth = 64, gridHeight = gridWidth;
     private const int maxRoomSizeX = 8, maxRoomSizeY = maxRoomSizeX;
-    private const int maxRooms = 100;
+    private const int maxRooms = 25;
     private Vector2 center, size;
     [SerializeField] private float time = 0.3f;
     private WaitForSeconds interval = new(0.3f);
@@ -64,7 +66,9 @@ public class LevelGenerator : MonoBehaviour
             while (Physics2D.OverlapBoxAll(center, size, 0).Length > 0)
             {
                 Randomize();
+#if Debug
                 yield return interval;
+#endif
             }
 
             FillBlock(grid, x, y, w, h, TileType.Wall);
@@ -77,7 +81,11 @@ public class LevelGenerator : MonoBehaviour
 
             grid = new TileType[gridHeight, gridWidth];
 
+#if Debug
             yield return interval;
+#else
+            yield return null;
+#endif
         }
 
         FillBlock(grid, 32, 28, 1, 1, TileType.Player);
@@ -151,11 +159,12 @@ public class LevelGenerator : MonoBehaviour
         return null;
     }
 
-
+#if Debug
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
 
         Gizmos.DrawWireCube(center, size);
     }
+#endif
 }
