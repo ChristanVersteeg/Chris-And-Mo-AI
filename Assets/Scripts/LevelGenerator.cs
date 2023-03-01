@@ -1,4 +1,4 @@
-﻿#define Debug
+﻿//#define Debug
 //#define DelayRoomGeneration
 
 using Random = System.Random;
@@ -126,16 +126,20 @@ public class LevelGenerator : MonoBehaviour
             doorPositions.Add(u);
             doorPositions.Add(d);
 
-            debug.AddRange(doorPositions);
 #else
             doorPositions.Add((r, Direction.Right));
             doorPositions.Add((l, Direction.Left));
             doorPositions.Add((u, Direction.Up));
             doorPositions.Add((d, Direction.Down));
+
+            for (int j = 0; j < doorPositions.Count; j++)
+                debug.Add(doorPositions[j].Item1);
 #endif
 
             int openDoors = random.Next(1, 5);
+#if Debug
             intDebug.Add(openDoors);
+#endif
             int openedDoors = 0;
 
             void TryOpenDoor()
@@ -176,8 +180,10 @@ public class LevelGenerator : MonoBehaviour
             for (int j = 0; j < openDoors; j++)
                 TryOpenDoor();
 
+#if Debug
             print($"Amount of doors opened: {openDoors}, door positions remaining: {doorPositions.Count}");
             intDebug2.Add(openedDoors);
+#endif
 
             CreateTilesFromArray(grid);
 
