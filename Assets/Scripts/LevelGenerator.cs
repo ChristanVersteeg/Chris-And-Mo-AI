@@ -32,6 +32,7 @@ public class LevelGenerator : MonoBehaviour
 
     private List<GameObject> currentRoom = new();
     private List<Vector4> roomSpaces = new();
+    private List<Vector2Int> permanentDoorPositions = new();
     private bool[,] roomGrid = new bool[gridWidth, gridHeight];
     private Vector2 center, size;
     private int cycleCount;
@@ -181,6 +182,11 @@ public class LevelGenerator : MonoBehaviour
                     default:
                         break;
                 }
+#endif
+#if !Debug
+                permanentDoorPositions.Add(doorPositions[rand]);
+#else
+                    permanentDoorPositions.Add(doorPositions[rand].Item1);
 #endif
                 doorPositions.RemoveAt(rand);
 
@@ -349,6 +355,11 @@ public class LevelGenerator : MonoBehaviour
 
         foreach (Vector2 vector in debug)
             Gizmos.DrawWireCube(vector, Vector2.one);
+
+        Gizmos.color = Color.cyan;
+
+        foreach (Vector2Int vector in permanentDoorPositions)
+            Gizmos.DrawWireCube(new Vector2(vector.x, vector.y), Vector2.one);
     }
 #endif
     #endregion
