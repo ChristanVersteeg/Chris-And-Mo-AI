@@ -1,4 +1,4 @@
-﻿//#define Debug
+﻿#define Debug
 //#define DelayRoomGeneration
 
 using Random = System.Random;
@@ -181,7 +181,6 @@ public class LevelGenerator : MonoBehaviour
                 TryOpenDoor();
 
 #if Debug
-            print($"Amount of doors opened: {openDoors}, door positions remaining: {doorPositions.Count}");
             intDebug2.Add(openedDoors);
 #endif
 
@@ -218,9 +217,22 @@ public class LevelGenerator : MonoBehaviour
         foreach (int randomInt in intDebug2)
             actualOpenDoors += randomInt;
 
-        print($"Open Doors: {totalOpenDoors}, Closed And Open Doors: {roomCount * 4}, Percantage Of All Open Doors: {(float)totalOpenDoors / (roomCount * 4) * 100}%");
+        float avg = (float)(right + left + up + down) / 4;
+        float stDev = StDev(right, left, up, down);
+
+        float StDev(params int[] dirCount)
+        {
+            float sum = 0;
+            for (int i = 0; i < dirCount.Length; i++)
+            {
+                sum += Mathf.Pow(dirCount[i] - avg, 2) / dirCount.Length;
+            }
+            return Mathf.Sqrt(sum);
+        }
+        print($"Open Doors: {totalOpenDoors}, Closed And Open Doors: {roomCount * 4}, Percentage Of All Open Doors: {(float)totalOpenDoors / (roomCount * 4) * 100}%");
         print($"Expected Doors: {totalOpenDoors}, Actual Doors: {actualOpenDoors}");
-        print($"Right Doors: {right}, Left Doors: {left}, Up Doors: {up}, Down Doors: {down}");
+        print($"Right Doors: {right}, Left Doors: {left}, Up Doors: {up}, Down Doors: {down} \n " +
+            $"Average doors per direction {avg}, Standard Deviation: {stDev}, Coefficient of Variation: {stDev / avg}");
 #endif
     }
 
