@@ -13,6 +13,7 @@ public enum TileType
     Player,
     Enemy,
     Wall,
+    OuterWall,
     Door,
     Key,
     Dagger,
@@ -30,6 +31,8 @@ public class LevelGenerator : MonoBehaviour
     private TileType[,] tileGrid = new TileType[gridWidth, gridHeight];
 
     private List<GameObject> currentRoom = new();
+    private List<Vector4> roomSpaces = new();
+    private bool[,] roomGrid = new bool[gridWidth, gridHeight];
     private Vector2 center, size;
     private int cycleCount;
 
@@ -119,7 +122,9 @@ public class LevelGenerator : MonoBehaviour
             //Create Rooms
             FillBlock(grid, x, y, w, h, TileType.Wall);
 
-            FillBlock(grid, x + 1, y + 1, w - 2, h - 2, TileType.Empty);
+            Vector4 rS = new(x + 1, y + 1, w - 2, h - 2);
+            roomSpaces.Add(rS);
+            FillBlock(grid, (int)rS.x, (int)rS.y, (int)rS.z, (int)rS.w, TileType.Empty);
 
             Vector2Int r = new((int)center.x + w / 2, (int)center.y); //Right tile
             Vector2Int l = new((int)center.x - w / 2, (int)center.y); //Left tile
@@ -215,6 +220,19 @@ public class LevelGenerator : MonoBehaviour
 
         CreateTilesFromArray(grid);
 
+        grid = new TileType[gridHeight, gridWidth];
+
+        for (int y = 0; y < gridHeight; y++)
+        {
+            for (int x = 0; x < gridWidth; x++)
+            {
+                if (tileGrid[y, x] == TileType.Empty && !roomGrid[y, x])
+                    FillBlock(grid, x, y, 1, 1, TileType.OuterWall);
+            }
+        }
+
+        CreateTilesFromArray(grid);
+
         #region DEBUG
 #if Debug
         int totalOpenDoors = 0;
@@ -254,6 +272,9 @@ public class LevelGenerator : MonoBehaviour
             {
                 grid[tileY + y, tileX + x] = fillType;
                 tileGrid[tileY + y, tileX + x] = fillType;
+
+                if (grid[tileY + y, tileX + x] != TileType.OuterWall)
+                    roomGrid[tileY + y, tileX + x] = true;
             }
         }
     }
