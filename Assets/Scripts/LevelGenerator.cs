@@ -1,7 +1,4 @@
-﻿//#define Debug
-//#define DelayRoomGeneration
-
-using Random = System.Random;
+﻿using Random = System.Random;
 using UnityEngine;
 using Utils;
 using System.Collections.Generic;
@@ -33,48 +30,11 @@ public class LevelGenerator : MonoBehaviour
     private Vector2 center, size;
     private int cycleCount;
 
-    #region DEBUG
-#if Debug
-#if DelayRoomGeneration
-    [SerializeField] private float time = 0.3f;
-    private WaitForSeconds interval = new(0.3f);
-#endif
-
-    private List<Vector2Int> debug = new();
-    private List<int> intDebug = new();
-    private List<int> intDebug2 = new();
-    private int right, left, up, down;
-    private enum Direction
-    {
-        Right,
-        Left,
-        Up,
-        Down
-    }
-#endif
-    #endregion
-
-#if !Debug
     private List<Vector2Int> doorPositions = new();
-#else
-    private int roomCount;
-    private List<(Vector2Int, Direction)> doorPositions = new();
-#endif
-
-    #region DEBUG
-#if DelayRoomGeneration
-    private void OnValidate()
-    {
-        interval = new WaitForSeconds(time);
-    }
-#endif
-    #endregion
-
     protected void Start()
     {
         StartCoroutine(GenerateRooms());
     }
-
     private IEnumerator GenerateRooms()
     {
         int Random(int val) => random.Next(minRoomSize, val);
@@ -110,15 +70,10 @@ public class LevelGenerator : MonoBehaviour
             {
                 Randomize();
                 if (retryCount > maxRetries) break;
-#if DelayRoomGeneration
-                yield return interval;
-#endif
             }
             if (retryCount > maxRetries) break;
 
-            //Create Rooms
             FillBlock(grid, x, y, w, h, TileType.Wall);
-
             FillBlock(grid, x + 1, y + 1, w - 2, h - 2, TileType.Empty);
 
             Vector2Int r = new((int)center.x + w / 2, (int)center.y); //Right tile
@@ -126,25 +81,12 @@ public class LevelGenerator : MonoBehaviour
             Vector2Int u = new((int)center.x, (int)center.y + h / 2); //Up tile
             Vector2Int d = new((int)center.x, (int)center.y - h / 2); //Down tile
 
-#if !Debug
             doorPositions.Add(r);
             doorPositions.Add(l);
             doorPositions.Add(u);
             doorPositions.Add(d);
-#else
-            doorPositions.Add((r, Direction.Right));
-            doorPositions.Add((l, Direction.Left));
-            doorPositions.Add((u, Direction.Up));
-            doorPositions.Add((d, Direction.Down));
-
-            for (int j = 0; j < doorPositions.Count; j++)
-                debug.Add(doorPositions[j].Item1);
-#endif
 
             int openDoors = random.Next(1, 5);
-#if Debug
-            intDebug.Add(openDoors);
-#endif
             int openedDoors = 0;
 
             void TryOpenDoor()
@@ -153,30 +95,7 @@ public class LevelGenerator : MonoBehaviour
 
                 int rand = random.Next(0, doorPositions.Count);
 
-                //For some reason the y is the first and afterward is the x ¯\_(ツ)_/¯
-#if !Debug
                 grid[doorPositions[rand].y, doorPositions[rand].x] = TileType.Empty;
-#else
-                grid[doorPositions[rand].Item1.y, doorPositions[rand].Item1.x] = TileType.Empty;
-
-                switch (doorPositions[rand].Item2)
-                {
-                    case Direction.Right:
-                        right++;
-                        break;
-                    case Direction.Left:
-                        left++;
-                        break;
-                    case Direction.Up:
-                        up++;
-                        break;
-                    case Direction.Down:
-                        down++;
-                        break;
-                    default:
-                        break;
-                }
-#endif
                 doorPositions.RemoveAt(rand);
 
                 openedDoors++;
@@ -185,25 +104,14 @@ public class LevelGenerator : MonoBehaviour
             for (int j = 0; j < openDoors; j++)
                 TryOpenDoor();
 
-#if Debug
-            intDebug2.Add(openedDoors);
-#endif
-
             CreateTilesFromArray(grid);
 
             Debugger.instance.AddLabel((int)center.x, (int)center.y, $"Room: {i}").name = $"Room: {i}";
 
             grid = new TileType[gridHeight, gridWidth];
 
-#if DelayRoomGeneration
-            yield return interval;
-#else
-#if Debug
-            roomCount++;
-#endif
             doorPositions.Clear();
             yield return null;
-#endif
         }
 
         FillBlock(grid, 32, 28, 1, 1, TileType.Player);
@@ -214,38 +122,8 @@ public class LevelGenerator : MonoBehaviour
         FillBlock(grid, 32, 34, 1, 1, TileType.End);
 
         CreateTilesFromArray(grid);
-
-        #region DEBUG
-#if Debug
-        int totalOpenDoors = 0;
-        foreach (int randomInt in intDebug)
-            totalOpenDoors += randomInt;
-
-        int actualOpenDoors = 0;
-        foreach (int randomInt in intDebug2)
-            actualOpenDoors += randomInt;
-
-        float avg = (float)(right + left + up + down) / 4;
-        float stDev = StDev(right, left, up, down);
-
-        float StDev(params int[] dirCount)
-        {
-            float sum = 0;
-            for (int i = 0; i < dirCount.Length; i++)
-            {
-                sum += Mathf.Pow(dirCount[i] - avg, 2) / dirCount.Length;
-            }
-            return Mathf.Sqrt(sum);
-        }
-        print($"Open Doors: {totalOpenDoors}, Closed And Open Doors: {roomCount * 4}, Percentage Of All Open Doors: {(float)totalOpenDoors / (roomCount * 4) * 100}%");
-        print($"Expected Doors: {totalOpenDoors}, Actual Doors: {actualOpenDoors}");
-        print($"Right Doors: {right}, Left Doors: {left}, Up Doors: {up}, Down Doors: {down} \n " +
-            $"Average doors per direction {avg}, Standard Deviation: {stDev}, Coefficient of Variation: {stDev / avg}");
-#endif
-        #endregion
     }
 
-    //fill part of array with tiles 
     private void FillBlock(TileType[,] grid, int x, int y, int width = 1, int height = 1, TileType fillType = TileType.Empty)
     {
         for (int tileY = 0; tileY < height; tileY++)
@@ -258,7 +136,6 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
-    //use array to create tiles
     private void CreateTilesFromArray(TileType[,] grid)
     {
         int height = grid.GetLength(0);
@@ -285,7 +162,6 @@ public class LevelGenerator : MonoBehaviour
         cycleCount++;
     }
 
-    //create a single tile
     private GameObject CreateTile(int x, int y, TileType type)
     {
         int tileID = ((int)type) - 1;
@@ -306,29 +182,4 @@ public class LevelGenerator : MonoBehaviour
 
         return null;
     }
-
-    #region DEBUG
-#if Debug
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-
-        for (int i = 0; i < gridWidth; i++)
-        {
-            for (int j = 0; j < gridHeight; j++)
-            {
-                if (tileGrid[i, j] == TileType.Wall)
-                    Gizmos.DrawWireCube(new Vector2(j, i), Vector2.one);
-            }
-        }
-
-        Gizmos.color = Color.green;
-
-        Gizmos.DrawWireCube(center, size);
-
-        foreach (Vector2 vector in debug)
-            Gizmos.DrawWireCube(vector, Vector2.one);
-    }
-#endif
-    #endregion
 }
