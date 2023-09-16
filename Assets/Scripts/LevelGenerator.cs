@@ -86,27 +86,18 @@ public class LevelGenerator : MonoBehaviour
         StartCoroutine(CheckNearestRoom());
     }
 
-    private Collider2D[] OverLapCheck(int i, int incrementor)
+    private Collider2D OverLapCheck(int i, int incrementor)
     {
         center1 = new(roomSpaces[i].x + roomSpaces[i].z / 2, roomSpaces[i].y + roomSpaces[i].w / 2);
         size1 = new(roomSpaces[i].z + incrementor, roomSpaces[i].w + incrementor);
 
-        List<Collider2D> doorColliders = new();
+        Collider2D doorCollider = new();
 
         foreach (Collider2D collider in Physics2D.OverlapBoxAll(center1, size1, 0))
-            if (collider.transform.name == "FakeDoor(Clone)")
-                doorColliders.Add(collider);
+            if (collider.transform.name == "FakeDoor(Clone)" && collider.transform.parent.name != $"Room{i}")
+                doorCollider = collider;
 
-        return doorColliders.ToArray();
-    }
-
-    private int BaseOverLapCount(int i, int incrementor)
-    {
-        int baseOverLapCount = 0;
-        foreach (Collider2D collider in OverLapCheck(i, incrementor))
-            if (collider.transform.parent.name == $"Room{i}")
-                baseOverLapCount++;
-        return baseOverLapCount;
+        return doorCollider;
     }
 
     private IEnumerator CheckNearestRoom()
@@ -116,26 +107,13 @@ public class LevelGenerator : MonoBehaviour
         for (int i = 0; i < roomSpaces.Count; i++)
         {
             int incrementor = 0;
-
-            while ((OverLapCheck(i, incrementor).Length - BaseOverLapCount(i, incrementor)) <= 0)
+            while (OverLapCheck(i, incrementor) == null)
             {
                 incrementor++;
                 yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
             }
 
-            List<Collider2D> targetOverlap = OverLapCheck(i, incrementor).Skip(BaseOverLapCount(i, incrementor)).ToList();
-
-            Vector3 sum = Vector3.zero;
-            int transformCount = 0;
-
-            foreach (Collider2D collider in targetOverlap)
-            {
-                sum += collider.transform.position;
-                transformCount++;
-                outputCoords.Add(collider.transform.position);
-            }
-
-            //outputCoords.Add(sum / transformCount);
+            outputCoords.Add(OverLapCheck(i, incrementor).transform.position);
         }
 
         foreach (Vector2 vector in outputCoords)
