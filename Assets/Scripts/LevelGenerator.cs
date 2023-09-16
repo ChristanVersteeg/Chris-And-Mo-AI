@@ -18,7 +18,8 @@ public enum TileType
     Door,
     Key,
     Dagger,
-    End
+    End,
+    FakeDoor
 }
 
 public class LevelGenerator : MonoBehaviour
@@ -233,7 +234,7 @@ public class LevelGenerator : MonoBehaviour
 
                 //For some reason the y is the first and afterward is the x ¯\_(ツ)_/¯
 #if !Debug
-                grid[doorPositions[rand].y, doorPositions[rand].x] = TileType.Empty;
+                grid[doorPositions[rand].y, doorPositions[rand].x] = TileType.FakeDoor;
 #else
                 grid[doorPositions[rand].Item1.y, doorPositions[rand].Item1.x] = TileType.Empty;
 
