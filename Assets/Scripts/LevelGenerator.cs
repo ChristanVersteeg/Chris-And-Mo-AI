@@ -91,7 +91,13 @@ public class LevelGenerator : MonoBehaviour
         center1 = new(roomSpaces[i].x + roomSpaces[i].z / 2, roomSpaces[i].y + roomSpaces[i].w / 2);
         size1 = new(roomSpaces[i].z + incrementor, roomSpaces[i].w + incrementor);
 
-        return Physics2D.OverlapBoxAll(center1, size1, 0);
+        List<Collider2D> doorColliders = new();
+
+        foreach (Collider2D collider in Physics2D.OverlapBoxAll(center1, size1, 0))
+            if (collider.transform.name == "FakeDoor(Clone)")
+                doorColliders.Add(collider);
+
+        return doorColliders.ToArray();
     }
 
     private int BaseOverLapCount(int i, int incrementor)
