@@ -119,6 +119,11 @@ namespace InGame
         //when colliding with wall or door
         protected override bool HandleObstruction(GameObject other)
         {
+            if(other.TryGetComponent(out Passable passable))
+            {
+                passable.Pass();
+            }
+
             if (other.TryGetComponent(out Obstruction obstruction))
             {
                 if (obstruction.canBeOpened)

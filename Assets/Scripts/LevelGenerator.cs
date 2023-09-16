@@ -6,6 +6,7 @@ using UnityEngine;
 using Utils;
 using System.Collections.Generic;
 using System.Collections;
+using System.Linq;
 
 public enum TileType
 {
@@ -17,7 +18,8 @@ public enum TileType
     Door,
     Key,
     Dagger,
-    End
+    End,
+    FakeDoor
 }
 
 public class LevelGenerator : MonoBehaviour
@@ -39,7 +41,9 @@ public class LevelGenerator : MonoBehaviour
 
     private Vector2 point, size1;
     private Vector3 start, end;
+    private Vector2 center1, size1;
     private bool coroutineFinished;
+    private List<Vector2> outputCoords = new();
 
     private AStarPathmaker pathfinder;
     private List<Vector2Int> doorPositions = new List<Vector2Int>();
@@ -88,12 +92,18 @@ public class LevelGenerator : MonoBehaviour
         StartCoroutine(CheckNearestRoom());
     }
 
-    private Collider2D[] OverLapCheck(int i, int incrementor)
+    private Collider2D OverLapCheck(int i, int incrementor)
     {
-        point = new(roomSpaces[i].x, roomSpaces[i].y + incrementor);
-        size1 = new(roomSpaces[i].z, roomSpaces[i].w + incrementor);
+        center1 = new(roomSpaces[i].x + roomSpaces[i].z / 2, roomSpaces[i].y + roomSpaces[i].w / 2);
+        size1 = new(roomSpaces[i].z + incrementor, roomSpaces[i].w + incrementor);
 
-        return Physics2D.OverlapBoxAll(new Vector2(point.x + size1.x / 2, point.y + size1.y / 2), size1, 0);
+        Collider2D doorCollider = new();
+
+        foreach (Collider2D collider in Physics2D.OverlapBoxAll(center1, size1, 0))
+            if (collider.transform.name == "FakeDoor(Clone)" && collider.transform.parent.name != $"Room{i}")
+                doorCollider = collider;
+
+        return doorCollider;
     }
 
     IEnumerator CheckNearestRoom()
@@ -124,17 +134,37 @@ public class LevelGenerator : MonoBehaviour
                 start = new Vector3(path[j].x, path[j].y, 0);
                 end = new Vector3(path[j + 1].x, path[j + 1].y, 0);
             }
-        }    
+
+        for (int i = 0; i < roomSpaces.Count; i++)
+        {
+            int incrementor = 0;
+            while (OverLapCheck(i, incrementor) == null)
+            {
+                incrementor++;
+                yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
+            }
+
+            outputCoords.Add(OverLapCheck(i, incrementor).transform.position);
+        }
+
+        foreach (Vector2 vector in outputCoords)
+            print(vector);
     }
 
 #if !Debug
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
-        Gizmos.DrawWireCube(point, size1);
-        
+        Gizmos.DrawWireCube(center1, size1);
+
         Gizmos.color = Color.red;
         Gizmos.DrawLine(start, end);
+
+        Gizmos.color = Color.yellow;
+        foreach (Vector3 vector in outputCoords)
+        {
+            Gizmos.DrawWireCube(vector, Vector3.one);
+        }
     }
 #endif
 
@@ -163,6 +193,7 @@ public class LevelGenerator : MonoBehaviour
                 h = IsOdd(Random(maxRoomSizeY));
 
                 center = new Vector2(x + w / 2, y + h / 2);
+
                 size = new Vector2(w, h);
 
                 retryCount++;
@@ -183,7 +214,7 @@ public class LevelGenerator : MonoBehaviour
             FillBlock(grid, x, y, w, h, TileType.Wall);
 
             Vector4 rS = new(x + 1, y + 1, w - 2, h - 2);
-            roomSpaces.Add(rS);
+            roomSpaces.Add(new(x, y, w, h));
             FillBlock(grid, (int)rS.x, (int)rS.y, (int)rS.z, (int)rS.w, TileType.Empty);
 
             Vector2Int r = new((int)center.x + w / 2, (int)center.y); //Right tile
@@ -220,7 +251,7 @@ public class LevelGenerator : MonoBehaviour
 
                 //For some reason the y is the first and afterward is the x ¯\_(ツ)_/¯
 #if !Debug
-                grid[doorPositions[rand].y, doorPositions[rand].x] = TileType.Empty;
+                grid[doorPositions[rand].y, doorPositions[rand].x] = TileType.FakeDoor;
 #else
                 grid[doorPositions[rand].Item1.y, doorPositions[rand].Item1.x] = TileType.Empty;
 
@@ -287,14 +318,14 @@ public class LevelGenerator : MonoBehaviour
 
         grid = new TileType[gridHeight, gridWidth];
 
-       for (int y = 0; y < gridHeight; y++)
+        /*for (int y = 0; y < gridHeight; y++) !!!
         {
             for (int x = 0; x < gridWidth; x++)
             {
                 if (tileGrid[y, x] == TileType.Empty && !roomGrid[y, x])
                     FillBlock(grid, x, y, 1, 1, TileType.Empty);
             }
-        }
+        }*/
 
         CreateTilesFromArray(grid);
 
