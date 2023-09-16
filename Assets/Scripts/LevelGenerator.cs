@@ -37,8 +37,9 @@ public class LevelGenerator : MonoBehaviour
     private Vector2 center, size;
     private int cycleCount;
 
-    private Vector2 point, size1;
+    private Vector2 center1, size1;
     private bool coroutineFinished;
+    private List<Vector2> outputCoords = new();
 
     #region DEBUG
 #if Debug
@@ -80,39 +81,66 @@ public class LevelGenerator : MonoBehaviour
     protected void Start()
     {
         StartCoroutine(GenerateRooms());
-        Invoke(nameof(CheckNearestRoom), 2f);
+        StartCoroutine(CheckNearestRoom());
     }
 
     private Collider2D[] OverLapCheck(int i, int incrementor)
     {
-        point = new(roomSpaces[i].x, roomSpaces[i].y + incrementor);
-        size1 = new(roomSpaces[i].z, roomSpaces[i].w + incrementor);
+        center1 = new(roomSpaces[i].x + roomSpaces[i].z / 2, roomSpaces[i].y + roomSpaces[i].w / 2);
+        size1 = new(roomSpaces[i].z + incrementor, roomSpaces[i].w + incrementor);
 
-        return Physics2D.OverlapBoxAll(new Vector2(point.x + size1.x / 2, point.y + size1.y / 2), size1, 0);
+        return Physics2D.OverlapBoxAll(center1, size1, 0);
     }
 
-    private void CheckNearestRoom()
+    private int BaseOverLapCount(int i, int incrementor)
     {
+        int baseOverLapCount = 0;
+        foreach (Collider2D collider in OverLapCheck(i, incrementor))
+            if (collider.transform.parent.name == $"Room{i}")
+                baseOverLapCount++;
+        return baseOverLapCount;
+    }
+
+    private IEnumerator CheckNearestRoom()
+    {
+        yield return new WaitForSeconds(2f);
         print("Runs");
         for (int i = 0; i < roomSpaces.Count; i++)
         {
             print($"Enters for loop with values: {i} and {roomSpaces.Count}");
             int incrementor = 0;
-            while (OverLapCheck(i, incrementor).Length <= 0 && OverLapCheck(i, incrementor)[0].transform.parent.name == $"Room{i}")
+            print(
+                $"OverLapLength: {OverLapCheck(i, incrementor).Length}, " +
+                $"BaseOverLapLength: {BaseOverLapCount(i, incrementor)}, " +
+                $"Cumulative: {OverLapCheck(i, incrementor).Length - BaseOverLapCount(i, incrementor)}, " +
+                $"Boolean: {(OverLapCheck(i, incrementor).Length - BaseOverLapCount(i, incrementor)) <= 0}"
+                    );
+            while ((OverLapCheck(i, incrementor).Length - BaseOverLapCount(i, incrementor)) <= 0)
             {
+                print(
+                    $"OverLapLength: {OverLapCheck(i, incrementor).Length}, " +
+                    $"BaseOverLapLength: {BaseOverLapCount(i, incrementor)}, " +
+                    $"Cumulative: {OverLapCheck(i, incrementor).Length - BaseOverLapCount(i, incrementor)}, " +
+                    $"Boolean: {(OverLapCheck(i, incrementor).Length - BaseOverLapCount(i, incrementor)) <= 0}"
+                    );
+
                 print($"Iteration{incrementor}");
                 incrementor++;
+                yield return new WaitForSeconds(2f);
             }
+            outputCoords.Add(OverLapCheck(i, incrementor)[^1].offset);
         }
-
+        print("Exited for loop");
+        foreach (Vector2 vector in outputCoords)
+            print(vector);
     }
 
 #if !Debug
     private void OnDrawGizmos()
     {
-        Gizmos.DrawWireCube(point, size1);
-
         Gizmos.color = Color.green;
+
+        Gizmos.DrawWireCube(center1, size1);
     }
 #endif
 
@@ -141,6 +169,7 @@ public class LevelGenerator : MonoBehaviour
                 h = IsOdd(Random(maxRoomSizeY));
 
                 center = new Vector2(x + w / 2, y + h / 2);
+
                 size = new Vector2(w, h);
 
                 retryCount++;
@@ -161,7 +190,7 @@ public class LevelGenerator : MonoBehaviour
             FillBlock(grid, x, y, w, h, TileType.Wall);
 
             Vector4 rS = new(x + 1, y + 1, w - 2, h - 2);
-            roomSpaces.Add(rS);
+            roomSpaces.Add(new(x, y, w, h));
             FillBlock(grid, (int)rS.x, (int)rS.y, (int)rS.z, (int)rS.w, TileType.Empty);
 
             Vector2Int r = new((int)center.x + w / 2, (int)center.y); //Right tile
@@ -265,14 +294,14 @@ public class LevelGenerator : MonoBehaviour
 
         grid = new TileType[gridHeight, gridWidth];
 
-        for (int y = 0; y < gridHeight; y++)
+        /*for (int y = 0; y < gridHeight; y++) !!!
         {
             for (int x = 0; x < gridWidth; x++)
             {
                 if (tileGrid[y, x] == TileType.Empty && !roomGrid[y, x])
                     FillBlock(grid, x, y, 1, 1, TileType.OuterWall);
             }
-        }
+        }*/
 
         CreateTilesFromArray(grid);
 
@@ -303,7 +332,7 @@ public class LevelGenerator : MonoBehaviour
         print($"Right Doors: {right}, Left Doors: {left}, Up Doors: {up}, Down Doors: {down} \n " +
             $"Average doors per direction {avg}, Standard Deviation: {stDev}, Coefficient of Variation: {stDev / avg}");
 #endif
-#endregion
+        #endregion
 
         coroutineFinished = true;
     }
@@ -401,5 +430,5 @@ public class LevelGenerator : MonoBehaviour
             Gizmos.DrawWireCube(new Vector2(vector.x, vector.y), Vector2.one);
     }
 #endif
-#endregion
+    #endregion
 }
