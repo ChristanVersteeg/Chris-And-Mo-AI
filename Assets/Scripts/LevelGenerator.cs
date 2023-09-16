@@ -120,7 +120,7 @@ public class LevelGenerator : MonoBehaviour
             while ((OverLapCheck(i, incrementor).Length - BaseOverLapCount(i, incrementor)) <= 0)
             {
                 incrementor++;
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
             }
 
             List<Collider2D> targetOverlap = OverLapCheck(i, incrementor).Skip(BaseOverLapCount(i, incrementor)).ToList();
