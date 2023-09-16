@@ -37,6 +37,8 @@ public class LevelGenerator : MonoBehaviour
     private Vector2 center, size;
     private int cycleCount;
 
+    private bool coroutineFinished;
+
     #region DEBUG
 #if Debug
 #if DelayRoomGeneration
@@ -77,6 +79,30 @@ public class LevelGenerator : MonoBehaviour
     protected void Start()
     {
         StartCoroutine(GenerateRooms());
+        Invoke(nameof(CheckNearestRoom), 2f);
+    }
+
+    private Collider2D[] OverLapCheck(int i, int incrementor)
+    {
+        return Physics2D.OverlapBoxAll(
+                 new Vector2(roomSpaces[i].x, roomSpaces[i].y + incrementor),
+                 new Vector2(roomSpaces[i].z, roomSpaces[i].w + incrementor), 0);
+    }
+
+    private void CheckNearestRoom()
+    {
+        print("Runs");
+        for (int i = 0; i < roomSpaces.Count; i++)
+        {
+            print($"Enters for loop with values: {i} and {roomSpaces.Count}");
+            int incrementor = 0;
+            while (OverLapCheck(i, incrementor).Length <= 0 && OverLapCheck(i, incrementor)[0].transform.parent.name == $"Room{i}")
+            {
+                print($"Iteration{incrementor}");
+                incrementor++;
+            }
+        }
+
     }
 
     private IEnumerator GenerateRooms()
@@ -267,6 +293,8 @@ public class LevelGenerator : MonoBehaviour
             $"Average doors per direction {avg}, Standard Deviation: {stDev}, Coefficient of Variation: {stDev / avg}");
 #endif
         #endregion
+
+        coroutineFinished = true;
     }
 
     //fill part of array with tiles 
