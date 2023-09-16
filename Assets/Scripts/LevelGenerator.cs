@@ -39,7 +39,6 @@ public class LevelGenerator : MonoBehaviour
     private Vector2 center, size;
     private int cycleCount;
 
-    private Vector2 point, size1;
     private Vector3 start, end;
     private Vector2 center1, size1;
     private bool coroutineFinished;
@@ -134,21 +133,23 @@ public class LevelGenerator : MonoBehaviour
                 start = new Vector3(path[j].x, path[j].y, 0);
                 end = new Vector3(path[j + 1].x, path[j + 1].y, 0);
             }
+        }
 
-        for (int i = 0; i < roomSpaces.Count; i++)
+        for (int l = 0; l < roomSpaces.Count; l++)
         {
             int incrementor = 0;
-            while (OverLapCheck(i, incrementor) == null)
+            while (OverLapCheck(l, incrementor) == null)
             {
                 incrementor++;
                 yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
             }
 
-            outputCoords.Add(OverLapCheck(i, incrementor).transform.position);
+            outputCoords.Add(OverLapCheck(l, incrementor).transform.position);
         }
 
         foreach (Vector2 vector in outputCoords)
             print(vector);
+
     }
 
 #if !Debug
