@@ -6,6 +6,7 @@ using UnityEngine;
 using Utils;
 using System.Collections.Generic;
 using System.Collections;
+using System.Linq;
 
 public enum TileType
 {
@@ -104,33 +105,32 @@ public class LevelGenerator : MonoBehaviour
     private IEnumerator CheckNearestRoom()
     {
         yield return new WaitForSeconds(2f);
-        print("Runs");
+
         for (int i = 0; i < roomSpaces.Count; i++)
         {
-            print($"Enters for loop with values: {i} and {roomSpaces.Count}");
             int incrementor = 0;
-            print(
-                $"OverLapLength: {OverLapCheck(i, incrementor).Length}, " +
-                $"BaseOverLapLength: {BaseOverLapCount(i, incrementor)}, " +
-                $"Cumulative: {OverLapCheck(i, incrementor).Length - BaseOverLapCount(i, incrementor)}, " +
-                $"Boolean: {(OverLapCheck(i, incrementor).Length - BaseOverLapCount(i, incrementor)) <= 0}"
-                    );
+
             while ((OverLapCheck(i, incrementor).Length - BaseOverLapCount(i, incrementor)) <= 0)
             {
-                print(
-                    $"OverLapLength: {OverLapCheck(i, incrementor).Length}, " +
-                    $"BaseOverLapLength: {BaseOverLapCount(i, incrementor)}, " +
-                    $"Cumulative: {OverLapCheck(i, incrementor).Length - BaseOverLapCount(i, incrementor)}, " +
-                    $"Boolean: {(OverLapCheck(i, incrementor).Length - BaseOverLapCount(i, incrementor)) <= 0}"
-                    );
-
-                print($"Iteration{incrementor}");
                 incrementor++;
                 yield return new WaitForSeconds(0.5f);
             }
-            outputCoords.Add(OverLapCheck(i, incrementor)[^1].transform.position);
+
+            List<Collider2D> targetOverlap = OverLapCheck(i, incrementor).Skip(BaseOverLapCount(i, incrementor)).ToList();
+
+            Vector3 sum = Vector3.zero;
+            int transformCount = 0;
+
+            foreach (Collider2D collider in targetOverlap)
+            {
+                sum += collider.transform.position;
+                transformCount++;
+                outputCoords.Add(collider.transform.position);
+            }
+
+            //outputCoords.Add(sum / transformCount);
         }
-        print("Exited for loop");
+
         foreach (Vector2 vector in outputCoords)
             print(vector);
     }
@@ -141,6 +141,12 @@ public class LevelGenerator : MonoBehaviour
         Gizmos.color = Color.green;
 
         Gizmos.DrawWireCube(center1, size1);
+
+        Gizmos.color = Color.yellow;
+        foreach (Vector3 vector in outputCoords)
+        {
+            Gizmos.DrawWireCube(vector, Vector3.one);
+        }
     }
 #endif
 
