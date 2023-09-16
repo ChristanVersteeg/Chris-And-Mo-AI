@@ -37,6 +37,7 @@ public class LevelGenerator : MonoBehaviour
     private Vector2 center, size;
     private int cycleCount;
 
+    private Vector2 point, size1;
     private bool coroutineFinished;
 
     #region DEBUG
@@ -84,9 +85,10 @@ public class LevelGenerator : MonoBehaviour
 
     private Collider2D[] OverLapCheck(int i, int incrementor)
     {
-        return Physics2D.OverlapBoxAll(
-                 new Vector2(roomSpaces[i].x, roomSpaces[i].y + incrementor),
-                 new Vector2(roomSpaces[i].z, roomSpaces[i].w + incrementor), 0);
+        point = new(roomSpaces[i].x, roomSpaces[i].y + incrementor);
+        size1 = new(roomSpaces[i].z, roomSpaces[i].w + incrementor);
+
+        return Physics2D.OverlapBoxAll(new Vector2(point.x + size1.x / 2, point.y + size1.y / 2), size1, 0);
     }
 
     private void CheckNearestRoom()
@@ -104,6 +106,15 @@ public class LevelGenerator : MonoBehaviour
         }
 
     }
+
+#if !Debug
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireCube(point, size1);
+
+        Gizmos.color = Color.green;
+    }
+#endif
 
     private IEnumerator GenerateRooms()
     {
@@ -292,7 +303,7 @@ public class LevelGenerator : MonoBehaviour
         print($"Right Doors: {right}, Left Doors: {left}, Up Doors: {up}, Down Doors: {down} \n " +
             $"Average doors per direction {avg}, Standard Deviation: {stDev}, Coefficient of Variation: {stDev / avg}");
 #endif
-        #endregion
+#endregion
 
         coroutineFinished = true;
     }
@@ -390,5 +401,5 @@ public class LevelGenerator : MonoBehaviour
             Gizmos.DrawWireCube(new Vector2(vector.x, vector.y), Vector2.one);
     }
 #endif
-    #endregion
+#endregion
 }
