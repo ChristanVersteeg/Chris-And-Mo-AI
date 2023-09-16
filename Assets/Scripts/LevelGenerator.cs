@@ -126,9 +126,9 @@ public class LevelGenerator : MonoBehaviour
 
                 print($"Iteration{incrementor}");
                 incrementor++;
-                yield return new WaitForSeconds(2f);
+                yield return new WaitForSeconds(0.5f);
             }
-            outputCoords.Add(OverLapCheck(i, incrementor)[^1].offset);
+            outputCoords.Add(OverLapCheck(i, incrementor)[^1].transform.position);
         }
         print("Exited for loop");
         foreach (Vector2 vector in outputCoords)
