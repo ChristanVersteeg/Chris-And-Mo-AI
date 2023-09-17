@@ -194,7 +194,7 @@ public class LevelGenerator : MonoBehaviour
 #if !Debug
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.green;
+        Gizmos.color = Color.red;
         Gizmos.DrawWireCube(center1, size1);
 
         Gizmos.color = Color.red;

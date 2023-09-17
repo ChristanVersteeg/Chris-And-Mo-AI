@@ -41,7 +41,7 @@ public class Replaceable : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.blue; //new Color(255, 140, 0);
+        Gizmos.color = new Color(1.0f, 0.55f, 0.0f);
         foreach (Vector3 vector in debugList)
         {
             Gizmos.DrawWireCube(vector, Vector3.one / 2);
