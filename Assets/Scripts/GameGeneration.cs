@@ -29,10 +29,10 @@ public class GameGeneration : MonoBehaviour
         int j = ignoreStartingRoom ? Mathf.Clamp(i, 1, gen.realRoomSpaces.Count) : i;
 
         int x = Random.Range((int)gen.realRoomSpaces[j].x, 
-            (int)(gen.realRoomSpaces[j].x + gen.realRoomSpaces[j].z) + 1);
+            (int)(gen.realRoomSpaces[j].x + gen.realRoomSpaces[j].z));
 
         int y = Random.Range((int)gen.realRoomSpaces[j].y, 
-            (int)(gen.realRoomSpaces[j].y + gen.realRoomSpaces[j].w) + 1);
+            (int)(gen.realRoomSpaces[j].y + gen.realRoomSpaces[j].w));
 
         FillAndCreate(x, y, tileType);
     }
@@ -40,9 +40,13 @@ public class GameGeneration : MonoBehaviour
     private void GenerateGame()
     {
         RandomiseCoords(0, TileType.Player);
-        RandomiseCoords(Random.Range(1, gen.realRoomSpaces.Count), TileType.Key, true);
-
+        int keyRoomnum = Random.Range(1, gen.realRoomSpaces.Count);
         int endRoomNum = Random.Range(1, gen.realRoomSpaces.Count);
+        if (keyRoomnum == endRoomNum) keyRoomnum = Random.Range(1, gen.realRoomSpaces.Count);
+        else RandomiseCoords(keyRoomnum, TileType.Key);
+
+        Debug.Log(keyRoomnum);
+        Debug.Log(endRoomNum);
         RandomiseCoords(endRoomNum, TileType.End);
 
         for (int i = 0; i < Random.Range((int)(gen.realRoomSpaces.Count / enemyModifier), gen.realRoomSpaces.Count); i++)

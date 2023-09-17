@@ -136,10 +136,7 @@ public class LevelGenerator : MonoBehaviour
             canChangeName = false;
         }
 
-        foreach (Vector2 vector in outputCoords)
-            print(vector);
-
-        void RunPath(List<Vector2Int> path) 
+        void RunPath(List<Vector2Int> path)
         {
             for (int j = 0; j < path.Count - 1; j++)
             {
