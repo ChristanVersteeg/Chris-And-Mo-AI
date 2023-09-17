@@ -83,12 +83,20 @@ public class LevelGenerator : MonoBehaviour
 #endif
     #endregion
 
+    private bool running;
+
+    private void RunWithDelay()
+    {
+        running = true;
+    }
+
     protected void Start()
     {
         pathfinder = new AStarPathmaker(tileGrid);
 
         StartCoroutine(GenerateRooms());
         StartCoroutine(CheckNearestRoom());
+        Invoke(nameof(RunWithDelay), 2.0f);
     }
 
     private Collider2D OverLapCheck(int i, int incrementor)
@@ -165,6 +173,20 @@ public class LevelGenerator : MonoBehaviour
         foreach (Vector3 vector in outputCoords)
         {
             Gizmos.DrawWireCube(vector, Vector3.one);
+        }
+
+        if (running)
+        {
+            for (int y = 0; y < gridHeight; y++)
+            {
+                for (int x = 0; x < gridWidth; x++)
+                {
+                    if (tileGrid[y, x] == TileType.Wall)
+                    {
+                        Gizmos.DrawWireCube(new Vector2(x, y), Vector3.one);
+                    }
+                }
+            }
         }
     }
 #endif
@@ -252,7 +274,7 @@ public class LevelGenerator : MonoBehaviour
 
                 //For some reason the y is the first and afterward is the x ¯\_(ツ)_/¯
 #if !Debug
-                grid[doorPositions[rand].y, doorPositions[rand].x] = TileType.FakeDoor;
+                FillBlock(grid, doorPositions[rand].x, doorPositions[rand].y, 1, 1, TileType.FakeDoor);
 #else
                 grid[doorPositions[rand].Item1.y, doorPositions[rand].Item1.x] = TileType.Empty;
 
