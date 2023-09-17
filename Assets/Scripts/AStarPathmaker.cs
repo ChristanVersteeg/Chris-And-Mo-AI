@@ -68,9 +68,14 @@ public class AStarPathmaker : MonoBehaviour
 
     private float Distance(Vector2Int a, Vector2Int b)
     {
-        // Calculate the actual distance between two points.
-        // You can customize this based on your grid movement rules.
-        return 1.0f;
+        float distance = 0.0f;
+
+        if (grid[b.y, b.x] == TileType.OuterWall)
+        {
+            distance = 2.0f; // Set distance to 2 for OuterWall tiles.
+        }
+
+        return distance;
     }
 
     private List<Vector2Int> GetNeighbors(Vector2Int position)

@@ -43,7 +43,6 @@ public class LevelGenerator : MonoBehaviour
     private Vector2 center1, size1;
     private bool coroutineFinished;
     private List<Vector2> outputCoords = new();
-    Vector2Int door1, door2;
 
     private AStarPathmaker pathfinder;
     private List<Vector2Int> doorPositions = new List<Vector2Int>();
@@ -116,25 +115,32 @@ public class LevelGenerator : MonoBehaviour
 
     IEnumerator CheckNearestRoom()
     {
-        yield return new WaitForSeconds(2.0f);
-        Debug.Log("Checking nearest room paths for: " + permanentDoorPositions.Count + " doors");
+        yield return new WaitForSeconds(1.0f);
 
-        for (int i = 0; i < permanentDoorPositions.Count; i++)
+        for (int i = 0; i < roomSpaces.Count; i++)
         {
-            door1 = permanentDoorPositions[i];
-
-            if (i == permanentDoorPositions.Count - 1)
+            int incrementor = 0;
+            while (OverLapCheck(i, incrementor) == null)
             {
-                door2 = permanentDoorPositions[0]; // Wrap around to the first door for the last room.
-            }
-            else
-            {
-                door2 = permanentDoorPositions[i + 1];
+                incrementor++;
             }
 
-            List<Vector2Int> path = pathfinder.FindPath(door1, door2);
+            outputCoords.Add(OverLapCheck(i, incrementor).transform.position);
+        }
 
-            Debug.Log("Making a path of length: " + path.Count + " for door: " + door1 + " to door: " + door2);
+        foreach (Vector2 vector in outputCoords)
+            print(vector);
+
+        bool firstRoom = true;
+        for (int i = 0; i < roomSpaces.Count; i++)
+        {
+            List<Vector2Int> path =  pathfinder.FindPath(firstRoom ?
+                new Vector2Int((int)roomSpaces[0].x, (int)roomSpaces[0].y) :
+                new Vector2Int((int)outputCoords[i - 1].x, (int)outputCoords[i - 1].y),
+                new Vector2Int((int)outputCoords[i].x, (int)outputCoords[i].y)
+                );
+            firstRoom = false;
+
             for (int j = 0; j < path.Count - 1; j++)
             {
                 yield return new WaitForSeconds(.05f);
@@ -145,22 +151,6 @@ public class LevelGenerator : MonoBehaviour
                 FillBlock(tileGrid, path[j].x, path[j].y, 1, 1, TileType.Empty);
             }
         }
-
-        for (int l = 0; l < roomSpaces.Count; l++)
-        {
-            int incrementor = 0;
-            while (OverLapCheck(l, incrementor) == null)
-            {
-                incrementor++;
-                yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
-            }
-
-            outputCoords.Add(OverLapCheck(l, incrementor).transform.position);
-        }
-
-        foreach (Vector2 vector in outputCoords)
-            print(vector);
-
     }
 
 #if !Debug
@@ -174,7 +164,7 @@ public class LevelGenerator : MonoBehaviour
         Gizmos.DrawWireCube(start, Vector2.one);
 
         Gizmos.color = Color.cyan;
-        Gizmos.DrawLine(new Vector3(door1.x, door1.y), new Vector3(door2.x, door2.y));
+        //Gizmos.DrawLine(new Vector3(door1.x, door1.y), new Vector3(door2.x, door2.y));
 
         Gizmos.color = Color.yellow;
         foreach (Vector3 vector in outputCoords)
