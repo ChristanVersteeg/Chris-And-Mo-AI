@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Replaceable : MonoBehaviour
@@ -5,8 +6,11 @@ public class Replaceable : MonoBehaviour
     private LevelGenerator generator;
     private int overlapCount;
 
-    //add comments reeeeee
-    private void CheckOverlap(Vector3 direction) => overlapCount += Physics2D.OverlapBox(transform.position + direction, Vector2.one / 2, 0) == null ? 0 : 1;
+    private void CheckOverlap(Vector3 direction)
+    {
+        Collider2D collider = Physics2D.OverlapBox(transform.position + direction, Vector2.one / 2, 0);
+        overlapCount += (collider == null) ? 0 : (collider.name == "Wall(Clone)" || collider.name == "OuterWall(Clone)") ? 1 : 0;
+    }
 
     private void ReplaceTileWith(TileType tileType)
     {
@@ -21,7 +25,7 @@ public class Replaceable : MonoBehaviour
         CheckOverlap(Vector2.right);
         CheckOverlap(Vector2.down);
 
-        if (overlapCount > 3) 
+        if (overlapCount > 2)
             ReplaceTileWith(TileType.Wall);
         else if (transform.parent.name == $"Room{endRoomNum}")
             ReplaceTileWith(TileType.Door);
