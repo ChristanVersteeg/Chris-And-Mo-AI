@@ -6,7 +6,6 @@ using UnityEngine;
 using Utils;
 using System.Collections.Generic;
 using System.Collections;
-using System.Linq;
 
 public enum TileType
 {
@@ -138,6 +137,18 @@ public class LevelGenerator : MonoBehaviour
         foreach (Vector2 vector in outputCoords)
             print(vector);
 
+        void RunPath(List<Vector2Int> path) 
+        {
+            for (int j = 0; j < path.Count - 1; j++)
+            {
+                start = new Vector3(path[j].x, path[j].y, 0);
+                end = new Vector3(path[j + 1].x, path[j + 1].y, 0);
+                GameObject obj = Physics2D.OverlapBox(start, Vector2.one / 2, 0)?.gameObject;
+                if (obj?.name == "OuterWall(Clone)") Destroy(obj);
+                FillBlock(tileGrid, path[j].x, path[j].y, 1, 1, TileType.Empty);
+            }
+        }
+
         bool firstRoom = true;
         for (int i = 0; i < roomSpaces.Count; i++)
         {
@@ -148,15 +159,16 @@ public class LevelGenerator : MonoBehaviour
                 );
             firstRoom = false;
 
-            for (int j = 0; j < path.Count - 1; j++)
-            {
-                yield return new WaitForSeconds(.05f);
-                start = new Vector3(path[j].x, path[j].y, 0);
-                end = new Vector3(path[j + 1].x, path[j + 1].y, 0);
-                GameObject obj = Physics2D.OverlapBox(start, Vector2.one / 2, 0)?.gameObject;
-                if (obj?.name == "OuterWall(Clone)") Destroy(obj);
-                FillBlock(tileGrid, path[j].x, path[j].y, 1, 1, TileType.Empty);
-            }
+            RunPath(path);
+        }
+
+        for (int i = 0; i < permanentDoorPositions.Count; i++)
+        {
+            print("Devolved");
+
+            List<Vector2Int> path = pathfinder.FindPath(permanentDoorPositions[i - 1 < 0 ? 0 : i - 1], permanentDoorPositions[i]);
+
+            RunPath(path);
         }
     }
 

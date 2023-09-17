@@ -72,7 +72,7 @@ public class AStarPathmaker : MonoBehaviour
 
         if (grid[b.y, b.x] == TileType.OuterWall)
         {
-            distance = 2.0f; // Set distance to 2 for OuterWall tiles.
+            distance = 10.0f; // Set distance to 2 for OuterWall tiles.
         }
 
         return distance;
