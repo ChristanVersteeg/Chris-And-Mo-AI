@@ -107,8 +107,6 @@ public class LevelGenerator : MonoBehaviour
         center1 = new(roomSpaces[i].x + roomSpaces[i].z / 2, roomSpaces[i].y + roomSpaces[i].w / 2);
         size1 = new(roomSpaces[i].z + incrementor, roomSpaces[i].w + incrementor);
 
-        Collider2D doorCollider = new();
-
         foreach (Collider2D collider in Physics2D.OverlapBoxAll(center1, size1, 0))
             if (collider.transform.name == "FakeDoor(Clone)" && collider.transform.parent.name != $"Room{i}")
             {
@@ -130,6 +128,7 @@ public class LevelGenerator : MonoBehaviour
             while (OverLapCheck(i, incrementor) == null)
             {
                 incrementor++;
+                yield return new WaitForSeconds(0.1f);
             }
             canChangeName = true;
             outputCoords.Add(OverLapCheck(i, incrementor).transform.position);
@@ -161,7 +160,15 @@ public class LevelGenerator : MonoBehaviour
                 );
             firstRoom = false;
 
-            RunPath(path);
+            for (int j = 0; j < path.Count - 1; j++)
+            {
+                yield return new WaitForSeconds(0.1f);
+                start = new Vector3(path[j].x, path[j].y, 0);
+                end = new Vector3(path[j + 1].x, path[j + 1].y, 0);
+                GameObject obj = Physics2D.OverlapBox(start, Vector2.one / 2, 0)?.gameObject;
+                if (obj?.name == "OuterWall(Clone)") Destroy(obj);
+                FillBlock(tileGrid, path[j].x, path[j].y, 1, 1, TileType.Empty);
+            }
         }
 
         for (int i = 0; i < permanentDoorPositions.Count; i++)
@@ -170,7 +177,15 @@ public class LevelGenerator : MonoBehaviour
 
             List<Vector2Int> path = pathfinder.FindPath(permanentDoorPositions[i - 1 < 0 ? 0 : i - 1], permanentDoorPositions[i]);
 
-            RunPath(path);
+            for (int j = 0; j < path.Count - 1; j++)
+            {
+                yield return new WaitForSeconds(0.1f);
+                start = new Vector3(path[j].x, path[j].y, 0);
+                end = new Vector3(path[j + 1].x, path[j + 1].y, 0);
+                GameObject obj = Physics2D.OverlapBox(start, Vector2.one / 2, 0)?.gameObject;
+                if (obj?.name == "OuterWall(Clone)") Destroy(obj);
+                FillBlock(tileGrid, path[j].x, path[j].y, 1, 1, TileType.Empty);
+            }
         }
 
         onFinishedPathing();
