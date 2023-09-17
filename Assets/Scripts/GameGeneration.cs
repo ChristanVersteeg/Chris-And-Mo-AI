@@ -1,32 +1,63 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class GameGeneration : MonoBehaviour
 {
     private LevelGenerator gen;
+    private float doubleDaggerChance = 0.1f;
+    private float enemyModifier = 1.5f;
+    public static Action<int> onGameGenerated;
 
-    private void FillAndCreate(int x, int y, TileType tileType) 
+    void Start()
+    {
+        gen = FindObjectOfType<LevelGenerator>();
+
+        Invoke(nameof(Subscribe), 0.5f);
+    }
+
+    private void FillAndCreate(int x, int y, TileType tileType)
     {
         gen.FillBlock(gen.tileGrid, x, y, fillType: tileType);
         gen.CreateTile(x, y, tileType);
     }
 
-    private void GenerateGame() 
+    private void RandomiseCoords(in int i, TileType tileType, bool ignoreStartingRoom = false)
     {
-        FillAndCreate(32, 28, TileType.Player);
-        FillAndCreate(30, 30, TileType.Dagger);
-        FillAndCreate(34, 30, TileType.Key);
-        FillAndCreate(32, 32, TileType.Door);
-        FillAndCreate(32, 36, TileType.Enemy);
-        FillAndCreate(32, 34, TileType.End);
+        int j = ignoreStartingRoom ? Mathf.Clamp(i, 1, gen.realRoomSpaces.Count) : i;
+
+        int x = Random.Range((int)gen.realRoomSpaces[j].x, 
+            (int)(gen.realRoomSpaces[j].x + gen.realRoomSpaces[j].z) + 1);
+
+        int y = Random.Range((int)gen.realRoomSpaces[j].y, 
+            (int)(gen.realRoomSpaces[j].y + gen.realRoomSpaces[j].w) + 1);
+
+        FillAndCreate(x, y, tileType);
+    }
+
+    private void GenerateGame()
+    {
+        RandomiseCoords(0, TileType.Player);
+        RandomiseCoords(Random.Range(1, gen.realRoomSpaces.Count), TileType.Key, true);
+
+        int endRoomNum = Random.Range(1, gen.realRoomSpaces.Count);
+        RandomiseCoords(endRoomNum, TileType.End);
+
+        for (int i = 0; i < Random.Range((int)(gen.realRoomSpaces.Count / enemyModifier), gen.realRoomSpaces.Count); i++)
+        {
+            RandomiseCoords(i, TileType.Enemy, true);
+
+            for (int j = 0; j < 2; j++)
+            {
+                RandomiseCoords(i, TileType.Dagger);
+                if (Random.value > doubleDaggerChance) break;
+            }
+        }
+
+        onGameGenerated(endRoomNum);
     }
 
     private void Subscribe() => gen.onFinishedPathing += GenerateGame;
-
-    void Start()
-    {
-        gen = FindObjectOfType<LevelGenerator>();
-        Invoke(nameof(Subscribe), 0.5f);
-    }
 }

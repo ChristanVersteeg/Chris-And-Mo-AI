@@ -34,6 +34,7 @@ public class LevelGenerator : MonoBehaviour
 
     private List<GameObject> currentRoom = new();
     private List<Vector4> roomSpaces = new();
+    public List<Vector4> realRoomSpaces = new();
     private List<Vector2Int> permanentDoorPositions = new();
     private bool[,] roomGrid = new bool[gridWidth, gridHeight];
     private Vector2 center, size;
@@ -256,7 +257,10 @@ public class LevelGenerator : MonoBehaviour
             FillBlock(grid, x, y, w, h, TileType.Wall);
 
             Vector4 rS = new(x + 1, y + 1, w - 2, h - 2);
+
             roomSpaces.Add(new(x, y, w, h));
+            realRoomSpaces.Add(rS);
+
             FillBlock(grid, (int)rS.x, (int)rS.y, (int)rS.z, (int)rS.w, TileType.Empty);
 
             Vector2Int r = new((int)center.x + w / 2, (int)center.y); //Right tile
