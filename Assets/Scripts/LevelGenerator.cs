@@ -30,7 +30,7 @@ public class LevelGenerator : MonoBehaviour
     private const int minRoomSize = 5, maxRoomSizeX = 16, maxRoomSizeY = maxRoomSizeX;
     private const int maxRooms = 25;
     private const int maxRetries = 1000;
-    private TileType[,] tileGrid = new TileType[gridWidth, gridHeight];
+    public TileType[,] tileGrid = new TileType[gridWidth, gridHeight];
 
     private List<GameObject> currentRoom = new();
     private List<Vector4> roomSpaces = new();
@@ -129,7 +129,6 @@ public class LevelGenerator : MonoBehaviour
             while (OverLapCheck(i, incrementor) == null)
             {
                 incrementor++;
-                yield return new WaitForSeconds(0.1f);
             }
             canChangeName = true;
             outputCoords.Add(OverLapCheck(i, incrementor).transform.position);
@@ -350,13 +349,6 @@ public class LevelGenerator : MonoBehaviour
 #endif
         }
 
-        FillBlock(grid, 32, 28, 1, 1, TileType.Player);
-        FillBlock(grid, 30, 30, 1, 1, TileType.Dagger);
-        FillBlock(grid, 34, 30, 1, 1, TileType.Key);
-        FillBlock(grid, 32, 32, 1, 1, TileType.Door);
-        FillBlock(grid, 32, 36, 1, 1, TileType.Enemy);
-        FillBlock(grid, 32, 34, 1, 1, TileType.End);
-
         CreateTilesFromArray(grid);
 
         grid = new TileType[gridHeight, gridWidth];
@@ -405,7 +397,7 @@ public class LevelGenerator : MonoBehaviour
     }
 
     //fill part of array with tiles 
-    private void FillBlock(TileType[,] grid, int x, int y, int width = 1, int height = 1, TileType fillType = TileType.Empty)
+    public void FillBlock(TileType[,] grid, int x, int y, int width = 1, int height = 1, TileType fillType = TileType.Empty)
     {
         for (int tileY = 0; tileY < height; tileY++)
         {
@@ -448,7 +440,7 @@ public class LevelGenerator : MonoBehaviour
     }
 
     //create a single tile
-    public GameObject CreateTile(int x, int y, TileType type)
+    public GameObject CreateTile(int x, int y, TileType type, Transform parent = null)
     {
         int tileID = ((int)type) - 1;
         if (tileID >= 0 && tileID < tiles.Length)
@@ -456,7 +448,7 @@ public class LevelGenerator : MonoBehaviour
             GameObject tilePrefab = tiles[tileID];
             if (tilePrefab != null)
             {
-                GameObject newTile = Instantiate(tilePrefab, new Vector3(x, y, 0), Quaternion.identity);
+                GameObject newTile = Instantiate(tilePrefab, new Vector3(x, y, 0), Quaternion.identity, parent);
                 currentRoom.Add(newTile);
                 return newTile;
             }

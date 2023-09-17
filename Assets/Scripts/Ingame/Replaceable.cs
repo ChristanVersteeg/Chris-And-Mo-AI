@@ -18,7 +18,7 @@ public class Replaceable : MonoBehaviour
 
         if(overlapCount > 2) 
         { 
-            generator.CreateTile((int)transform.position.x, (int)transform.position.y, TileType.Wall);
+            generator.CreateTile((int)transform.position.x, (int)transform.position.y, TileType.Wall, transform.parent);
             Destroy(gameObject);
         }
     }
