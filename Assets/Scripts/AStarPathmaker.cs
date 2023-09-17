@@ -114,7 +114,7 @@ public class AStarPathmaker : MonoBehaviour
         // Customize this method to check if a cell at the specified position is walkable in your game.
         // For example, you might check if it's not a wall or obstacle.
         // You can use your grid data (the 'grid' variable) to determine walkability.
-        if (grid[position.y, position.x] == TileType.Wall || grid[position.y, position.x] == TileType.OuterWall)
+        if (grid[position.y, position.x] == TileType.Wall)
         {
             return false;
         }

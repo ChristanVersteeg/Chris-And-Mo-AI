@@ -43,6 +43,7 @@ public class LevelGenerator : MonoBehaviour
     private Vector2 center1, size1;
     private bool coroutineFinished;
     private List<Vector2> outputCoords = new();
+    Vector2Int door1, door2;
 
     private AStarPathmaker pathfinder;
     private List<Vector2Int> doorPositions = new List<Vector2Int>();
@@ -120,8 +121,7 @@ public class LevelGenerator : MonoBehaviour
 
         for (int i = 0; i < permanentDoorPositions.Count; i++)
         {
-            Vector2Int door1 = permanentDoorPositions[i];
-            Vector2Int door2;
+            door1 = permanentDoorPositions[i];
 
             if (i == permanentDoorPositions.Count - 1)
             {
@@ -134,12 +134,15 @@ public class LevelGenerator : MonoBehaviour
 
             List<Vector2Int> path = pathfinder.FindPath(door1, door2);
 
-            Debug.Log("Making: " + path.Count + " paths");
+            Debug.Log("Making a path of length: " + path.Count + " for door: " + door1 + " to door: " + door2);
             for (int j = 0; j < path.Count - 1; j++)
             {
-                yield return new WaitForSeconds(.5f);
+                yield return new WaitForSeconds(.05f);
                 start = new Vector3(path[j].x, path[j].y, 0);
                 end = new Vector3(path[j + 1].x, path[j + 1].y, 0);
+                GameObject obj = Physics2D.OverlapBox(start, Vector2.one / 2, 0)?.gameObject;
+                if (obj?.name == "OuterWall(Clone)") Destroy(obj);
+                FillBlock(tileGrid, path[j].x, path[j].y, 1, 1, TileType.Empty);
             }
         }
 
@@ -168,6 +171,10 @@ public class LevelGenerator : MonoBehaviour
 
         Gizmos.color = Color.red;
         Gizmos.DrawLine(start, end);
+        Gizmos.DrawWireCube(start, Vector2.one);
+
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawLine(new Vector3(door1.x, door1.y), new Vector3(door2.x, door2.y));
 
         Gizmos.color = Color.yellow;
         foreach (Vector3 vector in outputCoords)
@@ -341,14 +348,14 @@ public class LevelGenerator : MonoBehaviour
 
         grid = new TileType[gridHeight, gridWidth];
 
-        /*for (int y = 0; y < gridHeight; y++) !!!
+        for (int y = 0; y < gridHeight; y++)
         {
             for (int x = 0; x < gridWidth; x++)
             {
                 if (tileGrid[y, x] == TileType.Empty && !roomGrid[y, x])
-                    FillBlock(grid, x, y, 1, 1, TileType.Empty);
+                    FillBlock(grid, x, y, 1, 1, TileType.OuterWall);
             }
-        }*/
+        }
 
         CreateTilesFromArray(grid);
 
