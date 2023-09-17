@@ -6,6 +6,7 @@ using UnityEngine;
 using Utils;
 using System.Collections.Generic;
 using System.Collections;
+using System;
 
 public enum TileType
 {
@@ -43,6 +44,7 @@ public class LevelGenerator : MonoBehaviour
     private bool coroutineFinished;
     private bool canChangeName;
     private List<Vector2> outputCoords = new();
+    public Action onFinishedPathing;
 
     private AStarPathmaker pathfinder;
     private List<Vector2Int> doorPositions = new List<Vector2Int>();
@@ -170,6 +172,8 @@ public class LevelGenerator : MonoBehaviour
 
             RunPath(path);
         }
+
+        onFinishedPathing();
     }
 
 #if !Debug
@@ -444,7 +448,7 @@ public class LevelGenerator : MonoBehaviour
     }
 
     //create a single tile
-    private GameObject CreateTile(int x, int y, TileType type)
+    public GameObject CreateTile(int x, int y, TileType type)
     {
         int tileID = ((int)type) - 1;
         if (tileID >= 0 && tileID < tiles.Length)
