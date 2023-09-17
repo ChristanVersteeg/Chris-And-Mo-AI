@@ -42,6 +42,7 @@ public class LevelGenerator : MonoBehaviour
     private Vector3 start, end;
     private Vector2 center1, size1;
     private bool coroutineFinished;
+    private bool canChangeName;
     private List<Vector2> outputCoords = new();
 
     private AStarPathmaker pathfinder;
@@ -108,9 +109,13 @@ public class LevelGenerator : MonoBehaviour
 
         foreach (Collider2D collider in Physics2D.OverlapBoxAll(center1, size1, 0))
             if (collider.transform.name == "FakeDoor(Clone)" && collider.transform.parent.name != $"Room{i}")
-                doorCollider = collider;
+            {
+                if (canChangeName)
+                    collider.name = "RealDoor(Clone)";
+                return collider;
+            }
 
-        return doorCollider;
+        return null;
     }
 
     IEnumerator CheckNearestRoom()
@@ -123,9 +128,11 @@ public class LevelGenerator : MonoBehaviour
             while (OverLapCheck(i, incrementor) == null)
             {
                 incrementor++;
+                yield return new WaitForSeconds(0.1f);
             }
-
+            canChangeName = true;
             outputCoords.Add(OverLapCheck(i, incrementor).transform.position);
+            canChangeName = false;
         }
 
         foreach (Vector2 vector in outputCoords)
@@ -134,7 +141,7 @@ public class LevelGenerator : MonoBehaviour
         bool firstRoom = true;
         for (int i = 0; i < roomSpaces.Count; i++)
         {
-            List<Vector2Int> path =  pathfinder.FindPath(firstRoom ?
+            List<Vector2Int> path = pathfinder.FindPath(firstRoom ?
                 new Vector2Int((int)roomSpaces[0].x, (int)roomSpaces[0].y) :
                 new Vector2Int((int)outputCoords[i - 1].x, (int)outputCoords[i - 1].y),
                 new Vector2Int((int)outputCoords[i].x, (int)outputCoords[i].y)
