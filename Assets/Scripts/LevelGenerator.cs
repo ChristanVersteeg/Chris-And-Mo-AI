@@ -186,12 +186,13 @@ public class LevelGenerator : MonoBehaviour
         Gizmos.color = Color.cyan;
         //Gizmos.DrawLine(new Vector3(door1.x, door1.y), new Vector3(door2.x, door2.y));
 
-        Gizmos.color = Color.yellow;
+        Gizmos.color = Color.cyan;
         foreach (Vector3 vector in outputCoords)
         {
             Gizmos.DrawWireCube(vector, Vector3.one);
         }
 
+        Gizmos.color = Color.yellow;
         if (running)
         {
             for (int y = 0; y < gridHeight; y++)
@@ -200,7 +201,7 @@ public class LevelGenerator : MonoBehaviour
                 {
                     if (tileGrid[y, x] == TileType.Wall)
                     {
-                        Gizmos.DrawWireCube(new Vector2(x, y), Vector3.one);
+                        //Gizmos.DrawWireCube(new Vector2(x, y), Vector3.one);
                     }
                 }
             }
