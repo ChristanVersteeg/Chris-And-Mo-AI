@@ -162,7 +162,7 @@ public class LevelGenerator : MonoBehaviour
 
             for (int j = 0; j < path.Count - 1; j++)
             {
-                yield return new WaitForSeconds(0.1f);
+                yield return new WaitForSeconds(0.01f);
                 start = new Vector3(path[j].x, path[j].y, 0);
                 end = new Vector3(path[j + 1].x, path[j + 1].y, 0);
                 GameObject obj = Physics2D.OverlapBox(start, Vector2.one / 2, 0)?.gameObject;
@@ -179,7 +179,7 @@ public class LevelGenerator : MonoBehaviour
 
             for (int j = 0; j < path.Count - 1; j++)
             {
-                yield return new WaitForSeconds(0.1f);
+                yield return new WaitForSeconds(0.01f);
                 start = new Vector3(path[j].x, path[j].y, 0);
                 end = new Vector3(path[j + 1].x, path[j + 1].y, 0);
                 GameObject obj = Physics2D.OverlapBox(start, Vector2.one / 2, 0)?.gameObject;
@@ -210,7 +210,7 @@ public class LevelGenerator : MonoBehaviour
             Gizmos.DrawWireCube(vector, Vector3.one);
         }
 
-        if (running)
+/*        if (running)
         {
             for (int y = 0; y < gridHeight; y++)
             {
@@ -222,7 +222,7 @@ public class LevelGenerator : MonoBehaviour
                     }
                 }
             }
-        }
+        }*/
     }
 #endif
 
