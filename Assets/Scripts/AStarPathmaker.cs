@@ -18,7 +18,6 @@ public class AStarPathmaker : MonoBehaviour
 
     public List<Vector2Int> FindPath(Vector2Int start, Vector2Int target)
     {
-        // Initialize data structures.
         PriorityQueue<Vector2Int> openSet = new PriorityQueue<Vector2Int>();
         HashSet<Vector2Int> closedSet = new HashSet<Vector2Int>();
         Dictionary<Vector2Int, Vector2Int> cameFrom = new Dictionary<Vector2Int, Vector2Int>();
@@ -56,13 +55,11 @@ public class AStarPathmaker : MonoBehaviour
                 }
             }
         }
-        // No path found.
         return new List<Vector2Int>();
     }
 
     private float Heuristic(Vector2Int a, Vector2Int b)
     {
-        // Calculate the heuristic (estimated) distance between two points (e.g., Manhattan distance).
         return Math.Abs(a.x - b.x) + Math.Abs(a.y - b.y);
     }
 
@@ -72,7 +69,7 @@ public class AStarPathmaker : MonoBehaviour
 
         if (grid[b.y, b.x] == TileType.OuterWall)
         {
-            distance = 10.0f; // Set distance to 2 for OuterWall tiles.
+            distance = 10.0f;
         }
 
         return distance;
@@ -82,7 +79,6 @@ public class AStarPathmaker : MonoBehaviour
     {
         List<Vector2Int> neighbors = new List<Vector2Int>();
 
-        // Define the possible offsets for 4-way movement (up, down, left, right).
         Vector2Int[] possibleOffsets =
         {
         new Vector2Int(0, 1),  // Up
@@ -95,10 +91,8 @@ public class AStarPathmaker : MonoBehaviour
         {
             Vector2Int neighborPosition = position + offset;
 
-            // Check if the neighbor is within the grid bounds.
             if (IsWithinGridBounds(neighborPosition))
-            {
-                // Check if the neighbor is walkable (customize this condition based on your grid).
+            {              
                 if (IsWalkable(neighborPosition))
                 {
                     neighbors.Add(neighborPosition);
@@ -116,22 +110,12 @@ public class AStarPathmaker : MonoBehaviour
 
     private bool IsWalkable(Vector2Int position)
     {
-        // Customize this method to check if a cell at the specified position is walkable in your game.
-        // For example, you might check if it's not a wall or obstacle.
-        // You can use your grid data (the 'grid' variable) to determine walkability.
-        if (grid[position.y, position.x] == TileType.Wall)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+        if (grid[position.y, position.x] == TileType.Wall) return false;
+        else return true;
     }
 
     private List<Vector2Int> ReconstructPath(Dictionary<Vector2Int, Vector2Int> cameFrom, Vector2Int current)
     {
-        // Reconstruct the path from the target node back to the start node.
         List<Vector2Int> path = new List<Vector2Int>();
 
         while (cameFrom.ContainsKey(current))
@@ -140,13 +124,12 @@ public class AStarPathmaker : MonoBehaviour
             current = cameFrom[current];
         }
 
-        path.Insert(0, current); // Add the start node.
+        path.Insert(0, current); 
 
         return path;
     }
 }
 
-// PriorityQueue implementation (min-heap)
 public class PriorityQueue<T>
 {
     private List<Tuple<T, float>> elements = new List<Tuple<T, float>>();
